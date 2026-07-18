@@ -64,6 +64,7 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
   return {
     now,
     today,
+    vapidPublic: env.VAPID_PUBLIC ?? null,
     weekStart: ws,
     onboarded: members.length > 0,
     members,
