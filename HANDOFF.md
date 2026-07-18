@@ -21,9 +21,9 @@ Développer en autonomie « Le Village », PWA familiale gamifiée de gestion de
 ## Avancement (14 tâches, voir plan)
 
 - [x] Task 1 : Scaffold + pipeline (Vite app/, worker/, wrangler.jsonc, D1 créée, deploy OK, health OK, SPA servie)
-- [ ] Task 2 : Schéma D1 + migration + tâches par défaut
-- [ ] Task 3 : Domaine récurrence + distribution (TDD)
-- [ ] Task 4 : Domaine village/équilibre/suggestions (TDD)
+- [x] Task 2 : Schéma D1 (migration 0001 appliquée local + remote) + defaults.ts
+- [x] Task 3 : shared/schedule.ts + dates.ts (17 tests)
+- [x] Task 4 : shared/village.ts (LEVELS 18 paliers, freshness, balance, streaks) + shopping.ts (36 tests au total)
 - [ ] Task 5 : API REST
 - [ ] Task 6 : DO temps réel
 - [ ] Task 7 : Crons + Web Push
@@ -37,4 +37,4 @@ Développer en autonomie « Le Village », PWA familiale gamifiée de gestion de
 
 ## Prochaine étape
 
-Task 2 : écrire `migrations/0001_init.sql` (schéma complet dans le plan), l'appliquer en local et en remote, définir les task_defs par défaut dans `shared/defaults.ts` (seed à l'onboarding).
+Task 5 : API REST complète dans worker/api.ts (endpoints listés dans le plan : /state, /onboard, /occurrences/*, /shopping/*, /tasks, /week/regenerate, /push/subscribe), avec worker/db.ts pour les requêtes D1.
