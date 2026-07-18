@@ -68,6 +68,7 @@ export interface Occurrence {
   doneAt?: string | null;
   doneBy?: string | null;
   validatedBy?: string | null;
+  manual?: boolean;
 }
 
 export interface MemberProgress {
