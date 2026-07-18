@@ -1,0 +1,276 @@
+@import '@fontsource/fredoka/400.css';
+@import '@fontsource/fredoka/500.css';
+@import '@fontsource/fredoka/600.css';
+@import '@fontsource/atkinson-hyperlegible/400.css';
+@import '@fontsource/atkinson-hyperlegible/700.css';
+
+:root {
+  /* Palette « veillée au village » */
+  --foret: #1f3a33;
+  --foret-2: #2c4f44;
+  --parchemin: #fbf6ec;
+  --parchemin-2: #f3ead8;
+  --miel: #e8a548;
+  --miel-fonce: #c9862f;
+  --argile: #c96f4a;
+  --mousse: #6e9075;
+  --mousse-claire: #a8c4ae;
+  --encre: #26332e;
+  --encre-douce: #5a6b64;
+  --blanc: #fffdf8;
+  --danger: #b8503d;
+
+  --font-display: 'Fredoka', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+
+  --radius: 20px;
+  --radius-s: 12px;
+  --shadow: 0 4px 16px rgba(31, 58, 51, 0.12);
+  --shadow-soft: 0 2px 8px rgba(31, 58, 51, 0.08);
+
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--encre);
+  background: var(--foret);
+  overscroll-behavior-y: none;
+}
+
+h1,
+h2,
+h3,
+.display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--miel);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+input,
+select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* ---- Structure de l'app ---- */
+
+.app-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 16px calc(84px + var(--safe-bottom));
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--parchemin);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 16px;
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.05rem;
+  background: var(--miel);
+  color: var(--encre);
+  border-radius: 999px;
+  padding: 12px 24px;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn.secondary {
+  background: var(--parchemin-2);
+  color: var(--encre);
+}
+
+.btn.ghost {
+  background: transparent;
+  box-shadow: none;
+  color: var(--parchemin);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---- Barre d'onglets « panneaux de bois » ---- */
+
+.tabbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding: 6px 8px calc(8px + var(--safe-bottom));
+  background: linear-gradient(180deg, rgba(31, 58, 51, 0) 0%, rgba(24, 43, 37, 0.92) 38%, #182b25 100%);
+  z-index: 40;
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--mousse-claire);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  padding: 6px 10px 4px;
+  border-radius: var(--radius-s);
+  transition: transform 0.2s ease, color 0.2s ease;
+  min-width: 56px;
+}
+
+.tab .tab-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  filter: grayscale(0.4) brightness(0.95);
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.tab.active {
+  color: var(--miel);
+}
+
+.tab.active .tab-icon {
+  filter: none;
+  transform: translateY(-3px) scale(1.15);
+}
+
+.tab .badge {
+  position: absolute;
+  margin-left: 26px;
+  margin-top: -4px;
+  background: var(--argile);
+  color: var(--blanc);
+  font-size: 0.62rem;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+/* ---- Divers ---- */
+
+.title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 4px 2px 12px;
+}
+
+.title-row h2 {
+  color: var(--parchemin);
+  font-size: 1.35rem;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+
+.muted {
+  color: var(--encre-douce);
+  font-size: 0.9rem;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 4px solid var(--parchemin-2);
+  border-top-color: var(--miel);
+  animation: spin 0.9s linear infinite;
+  margin: 40vh auto 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.toast {
+  position: fixed;
+  bottom: calc(96px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--danger);
+  color: var(--blanc);
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  z-index: 100;
+  animation: toast-in 0.25s ease;
+  max-width: 90vw;
+  text-align: center;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
