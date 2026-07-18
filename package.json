@@ -1,0 +1,26 @@
+{
+  "name": "le-village",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yogeek/home-planner.git"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit && cd app && npx tsc -b",
+    "build": "cd app && npm run build",
+    "dev": "wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "migrate:local": "wrangler d1 migrations apply village-db --local",
+    "migrate:remote": "wrangler d1 migrations apply village-db --remote"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260718.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.112.0"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "le-village",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "app/dist",
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "village-db",
+      "database_id": "264d7adb-15c1-47d7-8fa3-67377d8bb3e6"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "VILLAGE_HUB", "class_name": "VillageHub" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["VillageHub"] }],
+  "triggers": {
+    "crons": ["0 3 * * *", "30 14 * * *", "0 14 * * SUN"]
+  },
+  "vars": {
+    "FAMILY_TOKEN": "dev-token"
+  },
+  "observability": { "enabled": true }
+}
