@@ -3,7 +3,8 @@ import { localDate, weekStart, addDays } from '../shared/dates';
 import { freshness, levelFor, updateStreak, weekBalance } from '../shared/village';
 import { suggest, frequentItems } from '../shared/shopping';
 import { DEFAULT_TASK_DEFS } from '../shared/defaults';
-import { SCENE_ZONES } from '../shared/types';
+import { AISLES, SCENE_ZONES } from '../shared/types';
+import { guessAisle } from '../shared/aisles';
 import {
   getAllProgress,
   getCategories,
@@ -275,16 +276,41 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
         .prepare("SELECT id FROM shopping_items WHERE lower(label) = lower(?) AND status IN ('open','checked')")
         .bind(label)
         .first();
-      if (existing) return json({ error: 'Déjà dans la liste' }, 409);
-      // Rayon : celui du dernier achat du même article si connu
-      const past = await db
-        .prepare('SELECT aisle FROM purchase_history WHERE lower(label) = lower(?) ORDER BY purchased_at DESC LIMIT 1')
-        .bind(label)
-        .first();
-      const aisle = (body.aisle as string) ?? (past?.aisle as string) ?? 'autre';
+      if (existing) {
+        // Déjà dans la liste : on augmente la quantité (« Lait ×2 »)
+        await db
+          .prepare("UPDATE shopping_items SET qty = qty + 1, status = 'open', checked_at = NULL WHERE id = ?")
+          .bind(existing.id as string)
+          .run();
+      } else {
+        // Rayon : dernier achat connu, sinon deviné d'après le nom
+        const past = await db
+          .prepare('SELECT aisle FROM purchase_history WHERE lower(label) = lower(?) ORDER BY purchased_at DESC LIMIT 1')
+          .bind(label)
+          .first();
+        const aisle = (body.aisle as string) ?? (past?.aisle as string) ?? guessAisle(label);
+        await db
+          .prepare('INSERT INTO shopping_items (id, label, aisle, added_by, added_at) VALUES (?, ?, ?, ?, ?)')
+          .bind(crypto.randomUUID(), label, aisle, (body.byMemberId as string) ?? '', new Date().toISOString())
+          .run();
+      }
+      notify();
+      return json(await buildState(env));
+    }
+
+    // Changement manuel de rayon ou de quantité
+    const shopIdMatch = path.match(/^\/shopping\/([^/]+)$/);
+    if (shopIdMatch && method === 'PUT') {
+      const body = await readBody(request);
+      const item = await db.prepare('SELECT * FROM shopping_items WHERE id = ?').bind(shopIdMatch[1]).first();
+      if (!item) return json({ error: 'Article introuvable' }, 404);
       await db
-        .prepare('INSERT INTO shopping_items (id, label, aisle, added_by, added_at) VALUES (?, ?, ?, ?, ?)')
-        .bind(crypto.randomUUID(), label, aisle, (body.byMemberId as string) ?? '', new Date().toISOString())
+        .prepare('UPDATE shopping_items SET aisle = ?, qty = ? WHERE id = ?')
+        .bind(
+          AISLES.includes(body.aisle as (typeof AISLES)[number]) ? (body.aisle as string) : (item.aisle as string),
+          Math.max(1, Number(body.qty) || (item.qty as number)),
+          shopIdMatch[1],
+        )
         .run();
       notify();
       return json(await buildState(env));

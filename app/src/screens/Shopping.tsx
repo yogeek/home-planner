@@ -4,6 +4,51 @@ import { AISLE_ORDER, AISLE_EMOJI } from '../zones';
 import type { ShoppingItem } from '../types';
 import './shopping.css';
 
+/** Fiche article : changer de rayon ou de quantité */
+function ItemSheet({ item, onClose }: { item: ShoppingItem; onClose: () => void }) {
+  const updateShoppingItem = useStore((s) => s.updateShoppingItem);
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+        <h3>{item.label}</h3>
+        <p className="muted">Quantité :</p>
+        <div className="move-row">
+          <button
+            className="move-chip"
+            disabled={item.qty <= 1}
+            onClick={() => void updateShoppingItem(item, { qty: item.qty - 1 })}
+          >
+            −
+          </button>
+          <span className="shop-qty-value display">×{item.qty}</span>
+          <button className="move-chip" onClick={() => void updateShoppingItem(item, { qty: item.qty + 1 })}>
+            +
+          </button>
+        </div>
+        <p className="muted">Rayon :</p>
+        <div className="move-row wrap">
+          {AISLE_ORDER.map((a) => (
+            <button
+              key={a}
+              className={`move-chip ${item.aisle === a ? 'active' : ''}`}
+              onClick={() => {
+                void updateShoppingItem(item, { aisle: a });
+                onClose();
+              }}
+            >
+              {AISLE_EMOJI[a]} {a}
+            </button>
+          ))}
+        </div>
+        <button className="btn secondary sheet-close" onClick={onClose}>
+          Fermer
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function Shopping() {
   const state = useStore((s) => s.state);
   const addShoppingItem = useStore((s) => s.addShoppingItem);
@@ -11,6 +56,7 @@ export function Shopping() {
   const removeShoppingItem = useStore((s) => s.removeShoppingItem);
   const checkoutShopping = useStore((s) => s.checkoutShopping);
   const [input, setInput] = useState('');
+  const [detail, setDetail] = useState<ShoppingItem | null>(null);
 
   const open = useMemo(() => state?.shopping.filter((i) => i.status === 'open') ?? [], [state]);
   const checked = useMemo(() => state?.shopping.filter((i) => i.status === 'checked') ?? [], [state]);
@@ -90,7 +136,10 @@ export function Shopping() {
               <button className="shop-check" onClick={() => void toggleShoppingItem(item)} aria-label={`Prendre ${item.label}`}>
                 ⬜
               </button>
-              <span className="shop-label">{item.label}</span>
+              <button className="shop-label" onClick={() => setDetail(item)} title="Changer de rayon ou de quantité">
+                {item.label}
+                {item.qty > 1 && <span className="shop-qty"> ×{item.qty}</span>}
+              </button>
               <button className="shop-del" onClick={() => void removeShoppingItem(item)} aria-label={`Retirer ${item.label}`}>
                 ✕
               </button>
@@ -108,7 +157,10 @@ export function Shopping() {
                 <button className="shop-check" onClick={() => void toggleShoppingItem(item)} aria-label={`Reposer ${item.label}`}>
                   ✅
                 </button>
-                <span className="shop-label">{item.label}</span>
+                <span className="shop-label">
+                  {item.label}
+                  {item.qty > 1 && <span className="shop-qty"> ×{item.qty}</span>}
+                </span>
               </div>
             ))}
           </section>
@@ -117,6 +169,8 @@ export function Shopping() {
           </button>
         </>
       )}
+
+      {detail && <ItemSheet item={state.shopping.find((i) => i.id === detail.id) ?? detail} onClose={() => setDetail(null)} />}
     </div>
   );
 }

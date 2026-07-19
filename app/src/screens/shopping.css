@@ -105,6 +105,21 @@
   flex: 1;
   font-size: 1.02rem;
   color: var(--encre);
+  text-align: left;
+  padding: 6px 0;
+  margin: -6px 0;
+}
+
+.shop-qty {
+  color: var(--miel-fonce);
+  font-weight: 700;
+}
+
+.shop-qty-value {
+  align-self: center;
+  font-size: 1.2rem;
+  min-width: 48px;
+  text-align: center;
 }
 
 .shop-del {

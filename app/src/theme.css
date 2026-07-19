@@ -265,6 +265,10 @@ select {
   }
 }
 
+.toast.info {
+  background: var(--mousse);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

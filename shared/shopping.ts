@@ -32,7 +32,7 @@ export function suggest(history: Purchase[], nowISO: string): string[] {
   return due.sort((a, b) => b.overdue - a.overdue).map((d) => d.label);
 }
 
-/** Les articles les plus fréquents (jours d'achat distincts), max 12 */
+/** Les articles les plus fréquents (au moins 2 jours d'achat distincts), max 12 */
 export function frequentItems(history: Purchase[]): string[] {
   const counts = new Map<string, Set<string>>();
   for (const p of history) {
@@ -41,6 +41,7 @@ export function frequentItems(history: Purchase[]): string[] {
     counts.set(p.label, set);
   }
   return [...counts.entries()]
+    .filter(([, days]) => days.size >= 2)
     .sort((a, b) => b[1].size - a[1].size || a[0].localeCompare(b[0]))
     .slice(0, 12)
     .map(([label]) => label);

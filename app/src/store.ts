@@ -42,8 +42,11 @@ interface Store {
   addShoppingItem: (label: string, aisle?: string) => Promise<void>;
   toggleShoppingItem: (item: ShoppingItem) => Promise<void>;
   removeShoppingItem: (item: ShoppingItem) => Promise<void>;
+  updateShoppingItem: (item: ShoppingItem, changes: { aisle?: string; qty?: number }) => Promise<void>;
   checkoutShopping: () => Promise<void>;
 
+  info: string | null;
+  notifyInfo: (msg: string) => void;
   clearError: () => void;
 }
 
@@ -54,13 +57,14 @@ async function shoppingMutation(
   localPatch: (items: ShoppingItem[]) => ShoppingItem[],
   path: string,
   body: Record<string, unknown>,
+  method?: string,
 ): Promise<void> {
   const { state } = get();
   if (state) {
     set({ state: { ...state, shopping: localPatch(state.shopping) } });
   }
   try {
-    const s = await api(path, { body });
+    const s = await api(path, { body, method });
     set({ state: s });
     saveCache(s);
   } catch (e) {
@@ -70,7 +74,7 @@ async function shoppingMutation(
       void get().refresh();
     } else {
       // Hors ligne : on garde le changement local et on met en file
-      enqueue({ path, body });
+      enqueue({ path, body, method });
     }
   }
 }
@@ -205,11 +209,24 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   addShoppingItem: async (label, aisle) => {
+    const existing = get().state?.shopping.find((i) => i.label.toLowerCase() === label.toLowerCase());
+    if (existing) {
+      get().notifyInfo(`${existing.label} ×${existing.qty + 1} 🧺`);
+      await shoppingMutation(
+        get,
+        set,
+        (items) => items.map((i) => (i.id === existing.id ? { ...i, qty: i.qty + 1, status: 'open' as const } : i)),
+        '/shopping',
+        { label, byMemberId: get().memberId },
+      );
+      return;
+    }
     const temp: ShoppingItem = {
       id: `local-${Date.now()}`,
       label,
       aisle: (aisle as ShoppingItem['aisle']) ?? 'autre',
       status: 'open',
+      qty: 1,
       addedBy: get().memberId ?? '',
       addedAt: new Date().toISOString(),
     };
@@ -218,6 +235,18 @@ export const useStore = create<Store>((set, get) => ({
       aisle,
       byMemberId: get().memberId,
     });
+  },
+
+  updateShoppingItem: async (item, changes) => {
+    if (item.id.startsWith('local-')) return;
+    await shoppingMutation(
+      get,
+      set,
+      (items) => items.map((i) => (i.id === item.id ? { ...i, ...changes } as ShoppingItem : i)),
+      `/shopping/${item.id}`,
+      changes,
+      'PUT',
+    );
   },
 
   toggleShoppingItem: async (item) => {
@@ -257,6 +286,14 @@ export const useStore = create<Store>((set, get) => ({
 
   checkoutShopping: async () => {
     await shoppingMutation(get, set, (items) => items.filter((i) => i.status !== 'checked'), '/shopping/checkout', {});
+  },
+
+  info: null,
+  notifyInfo: (msg) => {
+    set({ info: msg });
+    setTimeout(() => {
+      if (useStore.getState().info === msg) set({ info: null });
+    }, 2600);
   },
 
   clearError: () => set({ error: null }),

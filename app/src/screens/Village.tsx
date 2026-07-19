@@ -100,9 +100,11 @@ export function Village() {
             <div className="seesaw-base" />
           </div>
           <p className="muted seesaw-hint">
-            {Math.abs(tilt) < 4
-              ? 'Bel équilibre, continuez comme ça !'
-              : `${balance.ratio > 0.5 ? adults[0].name : adults[1].name} porte plus cette semaine. Un petit coup de main ?`}
+            {balance.totals[adults[0].id] + balance.totals[adults[1].id] === 0
+              ? 'La semaine commence : première mission cochée, premier gland !'
+              : Math.abs(tilt) < 4
+                ? 'Bel équilibre, continuez comme ça !'
+                : `${balance.ratio > 0.5 ? adults[0].name : adults[1].name} porte plus cette semaine. Un petit coup de main ?`}
           </p>
         </div>
       )}

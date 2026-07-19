@@ -96,6 +96,7 @@ export interface ShoppingItem {
   label: string;
   aisle: Aisle;
   status: 'open' | 'checked';
+  qty: number;
   addedBy: string;
   addedAt: string;
 }

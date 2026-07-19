@@ -84,6 +84,7 @@ function TaskCard({ occ }: { occ: Occurrence }) {
   const undoOccurrence = useStore((s) => s.undoOccurrence);
   const moveOccurrence = useStore((s) => s.moveOccurrence);
   const deleteOccurrence = useStore((s) => s.deleteOccurrence);
+  const notifyInfo = useStore((s) => s.notifyInfo);
   const setTab = useStore((s) => s.setTab);
   const state = useStore((s) => s.state);
   const me = useMe();
@@ -108,8 +109,8 @@ function TaskCard({ occ }: { occ: Occurrence }) {
 
   return (
     <div className={`task-card ${done ? 'done' : ''} ${popping ? 'popping' : ''}`}>
-      <button className="task-check" onClick={handleDone} aria-label={done ? 'Annuler' : 'Marquer fait'}>
-        {done ? '✅' : '⬜'}
+      <button className={`task-check ${done ? 'checked' : ''}`} onClick={handleDone} aria-label={done ? 'Annuler' : 'Marquer fait'}>
+        {done ? '✓' : ''}
       </button>
       <div className="task-body" onClick={() => setMenu(!menu)}>
         <span className="task-title">{occ.title}</span>
@@ -123,6 +124,7 @@ function TaskCard({ occ }: { occ: Occurrence }) {
           <button
             onClick={() => {
               void moveOccurrence(occ, { date: addDays(occ.date, 1) });
+              notifyInfo(`« ${occ.title} » reportée à demain ⏭️`);
               setMenu(false);
             }}
           >
@@ -132,6 +134,7 @@ function TaskCard({ occ }: { occ: Occurrence }) {
             <button
               onClick={() => {
                 void moveOccurrence(occ, { assignee: partner.id });
+                notifyInfo(`Proposée à ${partner.name} 🤝`);
                 setMenu(false);
               }}
             >
@@ -146,6 +149,7 @@ function TaskCard({ occ }: { occ: Occurrence }) {
                 return;
               }
               void deleteOccurrence(occ);
+              notifyInfo(`« ${occ.title} » supprimée 🗑️`);
               setMenu(false);
             }}
           >

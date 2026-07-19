@@ -57,9 +57,28 @@
 }
 
 .task-check {
-  font-size: 1.6rem;
-  line-height: 1;
-  padding: 4px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 3px solid var(--miel);
+  background: var(--blanc);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--blanc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.task-check:active {
+  transform: scale(0.9);
+}
+
+.task-check.checked {
+  background: var(--mousse);
+  border-color: var(--mousse);
 }
 
 .task-body {

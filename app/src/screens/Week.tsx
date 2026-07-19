@@ -52,6 +52,7 @@ export function Week() {
                 <button key={o.id} className={`week-task ${o.status}`} onClick={() => setEditing(o)}>
                   <span className="week-task-zone" aria-hidden>{catInfo(state.categories, o.zone).emoji}</span>
                   <span className="week-task-title">{o.title}</span>
+                  <span className="week-task-weight" aria-label={`${o.weight} glands`}>{'🌰'.repeat(o.weight)}</span>
                   {member && <Creature species={member.creature} size={26} />}
                 </button>
               );

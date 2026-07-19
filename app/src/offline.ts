@@ -3,6 +3,7 @@ import { api } from './api';
 export interface QueuedOp {
   path: string;
   body: Record<string, unknown>;
+  method?: string;
 }
 
 const QUEUE_KEY = 'village.queue';
@@ -52,7 +53,7 @@ export async function flushQueue(): Promise<boolean> {
   const remaining: QueuedOp[] = [];
   for (const op of q) {
     try {
-      await api(op.path, { body: op.body });
+      await api(op.path, { body: op.body, method: op.method });
     } catch (e) {
       // 4xx : opération invalide (doublon...), on la jette ; réseau : on garde
       if (!(e instanceof Error && 'status' in e && (e as { status: number }).status >= 400 && (e as { status: number }).status < 500)) {

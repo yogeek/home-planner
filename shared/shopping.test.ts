@@ -28,12 +28,15 @@ describe('suggest', () => {
 });
 
 describe('frequentItems', () => {
-  it('classe par fréquence, limite à 12', () => {
+  it('classe par fréquence, limite à 12, ignore les achats uniques', () => {
     const h: Purchase[] = [];
     for (let i = 0; i < 15; i++) h.push(p(`item${i}`, '2026-07-01'));
     for (let i = 0; i < 3; i++) h.push(p('lait', `2026-07-0${i + 1}`));
+    h.push(p('pain', '2026-07-01'), p('pain', '2026-07-08'));
     const top = frequentItems(h);
     expect(top[0]).toBe('lait');
+    expect(top).toContain('pain');
+    expect(top).not.toContain('item3'); // acheté une seule fois : pas une habitude
     expect(top.length).toBeLessThanOrEqual(12);
   });
 });

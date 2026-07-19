@@ -29,18 +29,28 @@ function NoToken() {
 
 function ErrorToast() {
   const error = useStore((s) => s.error);
+  const info = useStore((s) => s.info);
   const clearError = useStore((s) => s.clearError);
   useEffect(() => {
     if (!error) return;
     const t = setTimeout(clearError, 4000);
     return () => clearTimeout(t);
   }, [error, clearError]);
-  if (!error) return null;
-  return (
-    <div className="toast" role="alert">
-      {error}
-    </div>
-  );
+  if (error) {
+    return (
+      <div className="toast" role="alert">
+        {error}
+      </div>
+    );
+  }
+  if (info) {
+    return (
+      <div className="toast info" role="status">
+        {info}
+      </div>
+    );
+  }
+  return null;
 }
 
 export default function App() {

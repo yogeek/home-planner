@@ -59,6 +59,7 @@ export function rowToShoppingItem(r: Row): ShoppingItem {
     label: r.label as string,
     aisle: r.aisle as ShoppingItem['aisle'],
     status: r.status as ShoppingItem['status'],
+    qty: (r.qty as number) ?? 1,
     addedBy: r.added_by as string,
     addedAt: r.added_at as string,
   };
