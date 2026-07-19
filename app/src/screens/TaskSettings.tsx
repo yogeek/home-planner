@@ -278,7 +278,13 @@ function CategorySheet({ cat, onClose }: { cat: Category | null; onClose: () => 
 
   if (!state) return null;
 
-  const suggestions = ['🏃', '🎉', '🎨', '📄', '🐶', '🚗', '🎮', '📚', '🛠️', '💆'];
+  // Palette large : on clique plutôt que de taper (animaux, sport, loisirs, maison, admin...)
+  const suggestions = [
+    '🏃', '⚽', '🏀', '🚴', '🏊', '🧘', '🎾', '⛳',
+    '🎉', '🎨', '🎮', '🎸', '🎭', '📷', '🍿', '✈️',
+    '🐶', '🐱', '🐰', '🐟', '🐴', '🌱', '🪴', '🐝',
+    '📄', '📚', '💼', '💳', '📅', '🔧', '🚗', '🏠',
+  ];
 
   async function save() {
     if (!label.trim() || busy) return;
@@ -320,15 +326,25 @@ function CategorySheet({ cat, onClose }: { cat: Category | null; onClose: () => 
           onChange={(e) => setLabel(e.target.value)}
         />
 
-        <p className="muted">Emoji :</p>
-        <div className="move-row wrap">
-          <input className="ob-input tset-emoji" placeholder="⭐" value={emoji} onChange={(e) => setEmoji(e.target.value)} />
+        <p className="muted">Emoji : {emoji && <span className="tset-emoji-preview">{emoji}</span>}</p>
+        <div className="tset-emoji-grid">
           {suggestions.map((s) => (
-            <button key={s} className={`move-chip ${emoji === s ? 'active' : ''}`} onClick={() => setEmoji(s)}>
+            <button
+              key={s}
+              className={`tset-emoji-btn ${emoji === s ? 'active' : ''}`}
+              onClick={() => setEmoji(s)}
+              aria-label={`emoji ${s}`}
+            >
               {s}
             </button>
           ))}
         </div>
+        <input
+          className="ob-input tset-emoji-input"
+          placeholder="ou tape le tien : ⭐"
+          value={emoji}
+          onChange={(e) => setEmoji(e.target.value)}
+        />
 
         {!cat?.builtin && (
           <>

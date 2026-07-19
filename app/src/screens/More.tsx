@@ -72,6 +72,27 @@ export function More() {
         <h2>Le coin du soir</h2>
       </div>
 
+      {/* Qui utilise l'app (changement de profil, mode enfant) */}
+      <div className="card more-card profile-card">
+        <div className="profile-current">
+          {me && <Creature species={me.creature} size={44} />}
+          <div>
+            <span className="muted">Tu es</span>
+            <strong className="profile-name">{me?.name}</strong>
+          </div>
+        </div>
+        <div className="profile-actions">
+          <button className="btn" onClick={() => chooseMember('')}>
+            🔄 Changer de personne
+          </button>
+          {child && (
+            <button className="btn secondary" onClick={() => setChildMode(true)}>
+              🧸 Mode {child.name}
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* La récolte de la semaine, en détail */}
       <div className="card more-card">
         <h3>🌾 La récolte en détail</h3>
@@ -159,11 +180,6 @@ export function More() {
 
       {/* Actions */}
       <div className="more-actions">
-        {child && (
-          <button className="btn" onClick={() => setChildMode(true)}>
-            🧸 Mode {child.name}
-          </button>
-        )}
         <button className="btn secondary" onClick={() => setMembersOpen(true)}>
           👪 Gérer les habitants
         </button>
@@ -175,9 +191,6 @@ export function More() {
         </button>
         <button className="btn secondary" onClick={share}>
           {copied ? 'Lien copié ! ✅' : '💌 Inviter sur cet appareil-là'}
-        </button>
-        <button className="btn secondary" onClick={() => chooseMember('')}>
-          👤 Changer de profil
         </button>
       </div>
 

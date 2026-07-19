@@ -13,6 +13,34 @@
   box-shadow: var(--shadow-soft);
 }
 
+.week-team {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: var(--parchemin);
+  border-radius: var(--radius-s);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+.week-team-person {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+}
+
+.week-team-name {
+  color: var(--encre);
+  font-weight: 700;
+}
+
+.week-team-count {
+  color: var(--miel-fonce);
+  font-weight: 700;
+}
+
 .week-day {
   margin-bottom: 14px;
 }

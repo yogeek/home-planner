@@ -110,8 +110,35 @@
   margin-top: 6px;
 }
 
-.tset-emoji {
-  width: 76px;
-  margin: 0;
-  padding: 8px;
+.tset-emoji-preview {
+  font-size: 1.3rem;
+  vertical-align: middle;
+}
+
+.tset-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin: 6px 0 10px;
+}
+
+.tset-emoji-btn {
+  aspect-ratio: 1;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: var(--blanc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tset-emoji-btn.active {
+  border-color: var(--miel);
+  background: rgba(232, 165, 72, 0.15);
+}
+
+.tset-emoji-input {
+  margin: 0 0 6px;
+  text-align: center;
 }

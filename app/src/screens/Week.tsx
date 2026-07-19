@@ -40,6 +40,23 @@ export function Week() {
         </button>
       </div>
 
+      {/* Qui fait quoi cette semaine : un coup d'œil par personne */}
+      <div className="week-team">
+        {state.members.map((m) => {
+          const mine = state.week.filter((o) => o.assignee === m.id && o.status !== 'skipped');
+          const done = mine.filter((o) => o.status === 'done').length;
+          return (
+            <div key={m.id} className="week-team-person">
+              <Creature species={m.creature} size={30} mood={mine.length > 0 && done === mine.length ? 'joy' : 'normal'} />
+              <span className="week-team-name">{m.name}</span>
+              <span className="week-team-count">
+                {done}/{mine.length}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
       {days.map((date, i) => {
         const tasks = state.week.filter((o) => o.date === date && o.status !== 'skipped');
         return (
