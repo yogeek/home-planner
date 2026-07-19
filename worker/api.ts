@@ -180,11 +180,15 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       const occ = await getOccurrence(db, occIdMatch[1]);
       if (!occ) return json({ error: 'Occurrence introuvable' }, 404);
       if (method === 'DELETE') {
-        // Si la tâche était faite, on retire ses glands avant de la supprimer
-        if (occ.status === 'done') {
-          await db.prepare('UPDATE village SET acorns = MAX(0, acorns - ?) WHERE id = 1').bind(occ.weight).run();
+        // Tâche partagée : on supprime tout le groupe. Sinon juste cette occurrence.
+        const group = occ.groupId
+          ? (await getOccurrencesBetween(db, occ.date, occ.date)).filter((o) => o.groupId === occ.groupId)
+          : [occ];
+        const acornsToRemove = group.filter((o) => o.status === 'done').reduce((s, o) => s + o.weight, 0);
+        if (acornsToRemove > 0) {
+          await db.prepare('UPDATE village SET acorns = MAX(0, acorns - ?) WHERE id = 1').bind(acornsToRemove).run();
         }
-        await db.prepare('DELETE FROM occurrences WHERE id = ?').bind(occ.id).run();
+        await db.batch(group.map((o) => db.prepare('DELETE FROM occurrences WHERE id = ?').bind(o.id)));
       } else {
         const body = await readBody(request);
         const cats = await getCategories(db);
@@ -256,14 +260,26 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       const cats = await getCategories(db);
       const zone = cats.some((c) => c.id === body.zone) ? (body.zone as string) : 'loisirs';
       const date = (body.date as string) ?? localDate(new Date().toISOString());
-      const assignee = (body.assignee as string) ?? (body.byMemberId as string);
-      if (!assignee) return json({ error: 'Assigné requis' }, 400);
-      await db
-        .prepare(
-          'INSERT INTO occurrences (id, def_id, title, zone, weight, date, assignee, status, manual) VALUES (?, NULL, ?, ?, ?, ?, ?, ?, 1)',
-        )
-        .bind(crypto.randomUUID(), title, zone, Number(body.weight) || 2, date, assignee, 'todo')
-        .run();
+      const weight = Number(body.weight) || 2;
+
+      // Une ou plusieurs personnes ; en cas de partage, une occurrence par participant liée par group_id
+      const requested = Array.isArray(body.assignees) && body.assignees.length
+        ? (body.assignees as string[])
+        : [(body.assignee as string) ?? (body.byMemberId as string)];
+      const memberIds = new Set((await getMembers(db)).map((m) => m.id));
+      const assignees = [...new Set(requested.filter((a) => memberIds.has(a)))];
+      if (!assignees.length) return json({ error: 'Assigné requis' }, 400);
+
+      const groupId = assignees.length > 1 ? crypto.randomUUID() : null;
+      await db.batch(
+        assignees.map((a) =>
+          db
+            .prepare(
+              'INSERT INTO occurrences (id, def_id, title, zone, weight, date, assignee, status, manual, group_id) VALUES (?, NULL, ?, ?, ?, ?, ?, ?, 1, ?)',
+            )
+            .bind(crypto.randomUUID(), title, zone, weight, date, a, 'todo', groupId),
+        ),
+      );
       notify();
       return json(await buildState(env));
     }

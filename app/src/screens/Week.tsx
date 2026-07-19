@@ -54,7 +54,10 @@ export function Week() {
               return (
                 <button key={o.id} className={`week-task ${o.status}`} onClick={() => setEditing(o)}>
                   <span className="week-task-zone" aria-hidden>{catInfo(state.categories, o.zone).emoji}</span>
-                  <span className="week-task-title">{o.title}</span>
+                  <span className="week-task-title">
+                    {o.title}
+                    {o.groupId && <span className="week-shared" title="Tâche à plusieurs"> 👥</span>}
+                  </span>
                   <span className="week-task-weight" aria-label={`${o.weight} glands`}>{'🌰'.repeat(o.weight)}</span>
                   {member && <Creature species={member.creature} size={26} />}
                 </button>
@@ -234,14 +237,21 @@ export function AddSheet({ onClose }: { onClose: () => void }) {
   const memberId = useStore((s) => s.memberId);
   const [title, setTitle] = useState('');
   const [zone, setZone] = useState('rangement');
-  const [assignee, setAssignee] = useState(memberId ?? '');
+  const [assignees, setAssignees] = useState<string[]>(memberId ? [memberId] : []);
   if (!state) return null;
 
+  const toggle = (id: string) =>
+    setAssignees((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+
   async function submit() {
-    if (!title.trim()) return;
-    const who = state!.members.find((m) => m.id === assignee);
-    await addOccurrence({ title: title.trim(), zone, assignee: assignee || undefined });
-    notifyInfo(`« ${title.trim()} » ajoutée pour ${who?.name ?? 'toi'} ✅`);
+    if (!title.trim() || assignees.length === 0) return;
+    const names = state!.members.filter((m) => assignees.includes(m.id)).map((m) => m.name);
+    await addOccurrence({ title: title.trim(), zone, assignees });
+    notifyInfo(
+      assignees.length > 1
+        ? `« ${title.trim()} » ajoutée pour ${names.join(' et ')} 👥`
+        : `« ${title.trim()} » ajoutée pour ${names[0] ?? 'toi'} ✅`,
+    );
     onClose();
   }
 
@@ -266,22 +276,24 @@ export function AddSheet({ onClose }: { onClose: () => void }) {
             </button>
           ))}
         </div>
-        <p className="muted">Pour qui ?</p>
+        <p className="muted">Pour qui ? {assignees.length > 1 && <span className="add-shared">👥 à plusieurs</span>}</p>
         <div className="move-row wrap">
           {state.members.map((m) => (
             <button
               key={m.id}
-              className={`move-chip ${assignee === m.id ? 'active' : ''}`}
-              onClick={() => setAssignee(m.id)}
+              className={`move-chip ${assignees.includes(m.id) ? 'active' : ''}`}
+              onClick={() => toggle(m.id)}
             >
               <Creature species={m.creature} size={26} /> {m.name}
             </button>
           ))}
         </div>
-        <button className="btn sheet-close" disabled={!title.trim()} onClick={() => void submit()}>
+        <button className="btn sheet-close" disabled={!title.trim() || assignees.length === 0} onClick={() => void submit()}>
           Ajouter (aujourd'hui)
         </button>
-        <p className="muted week-add-hint">Tu pourras la déplacer ou la modifier ensuite depuis la semaine.</p>
+        <p className="muted week-add-hint">
+          Sélectionne plusieurs personnes pour une tâche à faire à plusieurs : chacune la coche et gagne ses glands.
+        </p>
       </div>
     </div>
   );

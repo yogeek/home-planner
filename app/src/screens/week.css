@@ -126,3 +126,12 @@
   color: var(--danger);
   font-weight: 700;
 }
+
+.week-shared {
+  font-size: 0.85rem;
+}
+
+.add-shared {
+  color: var(--mousse);
+  font-weight: 700;
+}

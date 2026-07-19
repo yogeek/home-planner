@@ -167,3 +167,9 @@
   margin-bottom: 10px;
   font-size: 0.95rem;
 }
+
+.task-shared {
+  font-size: 0.78rem;
+  color: var(--mousse);
+  font-weight: 700;
+}

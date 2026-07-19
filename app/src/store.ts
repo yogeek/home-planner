@@ -36,7 +36,7 @@ interface Store {
   doneOccurrence: (occ: Occurrence, validatedBy?: string) => Promise<void>;
   undoOccurrence: (occ: Occurrence) => Promise<void>;
   moveOccurrence: (occ: Occurrence, changes: { date?: string; assignee?: string }) => Promise<void>;
-  addOccurrence: (data: { title: string; zone: string; weight?: number; date?: string; assignee?: string }) => Promise<void>;
+  addOccurrence: (data: { title: string; zone: string; weight?: number; date?: string; assignee?: string; assignees?: string[] }) => Promise<void>;
   editOccurrence: (occ: Occurrence, changes: { title?: string; zone?: string; weight?: number }) => Promise<void>;
   deleteOccurrence: (occ: Occurrence) => Promise<void>;
 

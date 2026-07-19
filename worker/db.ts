@@ -50,6 +50,7 @@ export function rowToOccurrence(r: Row): Occurrence {
     doneBy: (r.done_by as string) || null,
     validatedBy: (r.validated_by as string) || null,
     manual: !!r.manual,
+    groupId: (r.group_id as string) || null,
   };
 }
 

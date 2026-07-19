@@ -102,6 +102,13 @@ function TaskCard({ occ }: { occ: Occurrence }) {
   const meta = catInfo(state?.categories, occ.zone);
   const done = occ.status === 'done';
   const partner = state?.members.find((m) => m.role === 'adult' && m.id !== me?.id);
+  // Coéquipiers d'une tâche à plusieurs (les autres occurrences du même groupe)
+  const teammates = occ.groupId
+    ? (state?.week ?? [])
+        .filter((o) => o.groupId === occ.groupId && o.assignee !== occ.assignee)
+        .map((o) => ({ member: state?.members.find((m) => m.id === o.assignee), done: o.status === 'done' }))
+        .filter((t) => t.member)
+    : [];
 
   function handleDone() {
     if (done) {
@@ -124,6 +131,11 @@ function TaskCard({ occ }: { occ: Occurrence }) {
         <span className="task-meta">
           {meta.emoji} {meta.place} · {'🌰'.repeat(occ.weight)}
         </span>
+        {teammates.length > 0 && (
+          <span className="task-shared">
+            👥 avec {teammates.map((t) => `${t.member!.name}${t.done ? ' ✅' : ''}`).join(', ')}
+          </span>
+        )}
       </div>
       {popping && <span className="task-pop" aria-hidden>+{occ.weight} 🌰</span>}
       {menu && !done && (

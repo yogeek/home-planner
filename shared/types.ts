@@ -81,6 +81,8 @@ export interface Occurrence {
   doneBy?: string | null;
   validatedBy?: string | null;
   manual?: boolean;
+  /** Lie les occurrences d'une même tâche partagée (une par participant) */
+  groupId?: string | null;
 }
 
 export interface MemberProgress {
