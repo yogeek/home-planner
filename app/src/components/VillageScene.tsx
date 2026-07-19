@@ -58,18 +58,33 @@ function ZoneG({
   );
 }
 
-/** Petite maison d'habitant avec sa créature devant */
+/** Maison d'un habitant, avec sa créature devant et une plaque à son prénom */
 function House({ x, y, color, creature, name, scale = 1 }: { x: number; y: number; color: string; creature: string; name: string; scale?: number }) {
+  const plateW = Math.max(38, name.length * 6.2 + 18);
   return (
     <g transform={`translate(${x} ${y}) scale(${scale})`}>
-      <rect x="-16" y="-14" width="32" height="24" rx="3" fill="#e9dcc3" stroke="#b9a686" strokeWidth="1" />
-      <path d="M-20 -12 L0 -30 L20 -12 Z" fill={color} />
-      <rect x="-5" y="-2" width="10" height="12" rx="2" fill="#7a5c3e" />
-      <circle cx="9" cy="-4" r="3.4" fill="#fdf3da" stroke="#b9a686" strokeWidth="0.8" />
-      <foreignObject x="-30" y="-6" width="22" height="24">
-        <Creature species={creature} size={21} />
+      {/* ombre au sol */}
+      <ellipse cx="0" cy="15" rx="30" ry="6" fill="#1f2d22" opacity="0.12" />
+      {/* corps */}
+      <rect x="-20" y="-17" width="40" height="32" rx="3.5" fill="#efe3ca" stroke="#b9a686" strokeWidth="1.4" />
+      {/* toit */}
+      <path d="M-26 -14 L0 -37 L26 -14 Z" fill={color} />
+      <path d="M-26 -14 L0 -37 L26 -14" fill="none" stroke="#1f2d22" strokeOpacity="0.14" strokeWidth="1.2" />
+      {/* cheminée */}
+      <rect x="10" y="-33" width="6" height="12" rx="1" fill={color} />
+      {/* porte */}
+      <rect x="-14" y="-3" width="13" height="18" rx="2.5" fill="#7a5c3e" />
+      <circle cx="-3.5" cy="7" r="1.2" fill="#e8c98a" />
+      {/* fenêtre */}
+      <rect x="4" y="-7" width="11" height="10" rx="1.5" fill="#fdf3da" stroke="#b9a686" strokeWidth="0.9" />
+      <line x1="9.5" y1="-7" x2="9.5" y2="3" stroke="#b9a686" strokeWidth="0.7" />
+      {/* créature devant, à droite pour ne pas empiéter à gauche */}
+      <foreignObject x="13" y="-4" width="30" height="30">
+        <Creature species={creature} size={28} />
       </foreignObject>
-      <text x="0" y="18" textAnchor="middle" fontSize="6.4" fill="#3c4f47" fontFamily="Fredoka" opacity="0.85">
+      {/* plaque prénom */}
+      <rect x={-plateW / 2} y="18" width={plateW} height="16" rx="8" fill="#fbf6ec" stroke="#b9a686" strokeWidth="1" />
+      <text x="0" y="29" textAnchor="middle" fontSize="10" fontWeight="600" fill="#2c4f44" fontFamily="Fredoka">
         {name}
       </text>
     </g>
@@ -86,16 +101,16 @@ const DECOR: { x: number; y: number; emoji: string; size: number }[] = [
   { x: 274, y: 196, emoji: '🌉', size: 12 },
   { x: 96, y: 132, emoji: '🐝', size: 8 },
   { x: 60, y: 108, emoji: '🌬️', size: 12 },
-  { x: 316, y: 122, emoji: '🐻', size: 11 },
-  { x: 336, y: 176, emoji: '🍎', size: 9 },
-  { x: 36, y: 140, emoji: '🛖', size: 11 },
-  { x: 190, y: 120, emoji: '✨', size: 9 },
-  { x: 254, y: 120, emoji: '🎻', size: 9 },
-  { x: 130, y: 60, emoji: '🎈', size: 12 },
-  { x: 356, y: 186, emoji: '🗼', size: 11 },
-  { x: 302, y: 168, emoji: '🎪', size: 11 },
-  { x: 60, y: 50, emoji: '🌌', size: 12 },
-  { x: 200, y: 96, emoji: '🎆', size: 13 },
+  { x: 348, y: 170, emoji: '🐻', size: 11 },
+  { x: 336, y: 190, emoji: '🍎', size: 9 },
+  { x: 36, y: 150, emoji: '🛖', size: 11 },
+  { x: 92, y: 58, emoji: '✨', size: 9 },
+  { x: 356, y: 158, emoji: '🎻', size: 9 },
+  { x: 140, y: 44, emoji: '🎈', size: 12 },
+  { x: 366, y: 190, emoji: '🗼', size: 11 },
+  { x: 302, y: 176, emoji: '🎪', size: 11 },
+  { x: 60, y: 46, emoji: '🌌', size: 12 },
+  { x: 150, y: 50, emoji: '🎆', size: 13 },
 ];
 
 export function VillageScene({ freshness, members, unlockedCount, time, celebrateZone, onZoneTap }: Props) {
@@ -163,10 +178,10 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
         </text>
       ))}
 
-      {/* Maisons des habitants */}
-      {adults[0] && <House x={156} y={138} color="#c96f4a" creature={adults[0].creature} name={adults[0].name} />}
-      {adults[1] && <House x={248} y={134} color="#8b6fae" creature={adults[1].creature} name={adults[1].name} />}
-      {child && <House x={202} y={146} color="#6e9075" creature={child.creature} name={child.name} scale={0.72} />}
+      {/* Le hameau : les maisons des habitants, dégagées au-dessus des zones */}
+      {adults[0] && <House x={106} y={101} color="#c96f4a" creature={adults[0].creature} name={adults[0].name} scale={1.1} />}
+      {child && <House x={200} y={107} color="#6e9075" creature={child.creature} name={child.name} scale={0.92} />}
+      {adults[1] && <House x={292} y={101} color="#8b6fae" creature={adults[1].creature} name={adults[1].name} scale={1.1} />}
 
       {/* --- Zone : potager (jardin) --- */}
       <ZoneG zone="jardin" freshness={fJardin} celebrate={celebrateZone === 'jardin'} onTap={onZoneTap} label="Le potager">
