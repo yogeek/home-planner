@@ -16,7 +16,7 @@ C'est tout. Le village est né, la semaine est déjà organisée et répartie é
 
 - **iPhone** : ouvre le lien dans Safari → bouton Partager → « Sur l'écran d'accueil ». (Obligatoire pour recevoir les notifications sur iPhone.)
 - **Android** : ouvre le lien dans Chrome → menu ⋮ → « Ajouter à l'écran d'accueil » (ou accepte la bannière d'installation).
-- **Tablette de la cuisine** : ouvre le lien, choisis n'importe quel profil adulte, pose la tablette : en grand écran, l'app affiche automatiquement le tableau de bord du foyer, mis à jour en temps réel.
+- **Tablette de la cuisine** : ouvre le lien, choisis un profil adulte, puis « Plus » → « 🖼️ Mode tableau du foyer ». La tablette affiche alors le tableau de bord familial en temps réel (choix mémorisé). Pour en sortir : « ✕ Quitter le tableau ».
 
 ## Comment on joue
 
@@ -25,7 +25,8 @@ C'est tout. Le village est né, la semaine est déjà organisée et répartie é
 - **Semaine** : la répartition de la semaine, proposée automatiquement chaque dimanche soir (équilibrée par pénibilité, avec rotation des corvées). Tape une tâche pour changer de jour ou de personne, « + » pour en ajouter une, « ⚖️ Rééquilibrer » pour redistribuer.
 - **Courses** : la liste partagée en direct. Ajoutez au fil de la semaine ; celui qui est au magasin coche (ça marche même sans réseau). « Terminer les courses » apprend vos habitudes : l'app suggérera bientôt le lait toute seule 💡.
 - **Mode enfant** (bouton dans « Plus », ou son profil) : ses missions en images, plein écran. Quand il a fini, il tape sa mission et un parent valide : danse et confettis garantis, et ses glands comptent pour le village.
-- **Plus** : l'équilibre détaillé de la semaine et du mois, ta série de jours actifs, le journal du village, et l'activation des rappels.
+- **Plus** : l'équilibre détaillé de la semaine et du mois, ta série de jours actifs, le journal du village, l'activation des rappels, et « 🛠️ Régler les tâches du foyer » pour adapter les tâches récurrentes à votre vraie maison (nom, zone, pénibilité, fréquence ou jours fixes, en rotation ou toujours la même personne, mission enfant, saison, pause).
+- **Oups, coché par erreur ?** Retouche la coche (Aujourd'hui ou tableau) ou touche la tâche barrée dans Semaine → « ↩️ Remettre à faire ».
 
 ## Les rappels doux
 

@@ -18,6 +18,9 @@ interface Store {
   memberId: string | null;
   tab: TabId;
   childMode: boolean;
+  /** Mode tableau du foyer (tablette murale), mémorisé sur l'appareil */
+  dashboard: boolean;
+  setDashboard: (v: boolean) => void;
   loading: boolean;
   error: string | null;
   celebration: Celebration | null;
@@ -74,9 +77,15 @@ export const useStore = create<Store>((set, get) => ({
   memberId: getMemberId(),
   tab: 'village',
   childMode: false,
+  dashboard: localStorage.getItem('village.dashboard') === '1',
   loading: false,
   error: null,
   celebration: null,
+
+  setDashboard: (v) => {
+    localStorage.setItem('village.dashboard', v ? '1' : '0');
+    set({ dashboard: v });
+  },
 
   setTab: (tab) => set({ tab }),
   setChildMode: (childMode) => set({ childMode }),

@@ -13,6 +13,8 @@ export function Tablet() {
   const state = useStore((s) => s.state);
   const celebration = useStore((s) => s.celebration);
   const doneOccurrence = useStore((s) => s.doneOccurrence);
+  const undoOccurrence = useStore((s) => s.undoOccurrence);
+  const setDashboard = useStore((s) => s.setDashboard);
   const refresh = useStore((s) => s.refresh);
   const [celebrateZone, setCelebrateZone] = useState<Zone | null>(null);
 
@@ -44,6 +46,9 @@ export function Tablet() {
         <h1>Le Village</h1>
         <span className="tablet-date">{dateFmt}</span>
         <span className="tablet-acorns display">🌰 {village.acorns} · niveau {info.level}</span>
+        <button className="tablet-exit" onClick={() => setDashboard(false)} title="Revenir à l'application complète">
+          ✕ Quitter le tableau
+        </button>
       </header>
 
       <div className="tablet-grid">
@@ -87,8 +92,13 @@ export function Tablet() {
                   {tasks.map((t) => (
                     <li key={t.id} className={t.status}>
                       <button
-                        onClick={() => t.status === 'todo' && m.role !== 'child' && void doneOccurrence(t)}
-                        disabled={t.status !== 'todo' || m.role === 'child'}
+                        onClick={() => {
+                          if (m.role === 'child') return;
+                          if (t.status === 'todo') void doneOccurrence(t);
+                          else if (t.status === 'done') void undoOccurrence(t);
+                        }}
+                        disabled={m.role === 'child'}
+                        title={t.status === 'done' ? 'Annuler (coché par erreur ?)' : 'Marquer fait'}
                       >
                         {t.status === 'done' ? '✅' : '⬜'} {ZONE_META[t.zone].emoji} {t.title}
                       </button>

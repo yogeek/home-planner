@@ -12,7 +12,6 @@ import { Shopping } from './screens/Shopping';
 import { More } from './screens/More';
 import { ChildMode } from './screens/ChildMode';
 import { Tablet } from './screens/Tablet';
-import { useMediaQuery } from './useMediaQuery';
 
 function NoToken() {
   return (
@@ -49,9 +48,9 @@ export default function App() {
   const loading = useStore((s) => s.loading);
   const tab = useStore((s) => s.tab);
   const childMode = useStore((s) => s.childMode);
+  const dashboard = useStore((s) => s.dashboard);
   const refresh = useStore((s) => s.refresh);
   const me = useMe();
-  const isTablet = useMediaQuery('(min-width: 1024px)');
 
   const hasToken = !!getToken();
 
@@ -66,7 +65,7 @@ export default function App() {
   if (!state.onboarded) return <Onboarding />;
   if (!me) return <ProfilePicker />;
   if (me.role === 'child' || childMode) return <ChildMode />;
-  if (isTablet) return <Tablet />;
+  if (dashboard) return <Tablet />;
 
   return (
     <div className="app-shell">

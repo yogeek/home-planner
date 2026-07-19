@@ -50,7 +50,7 @@ export function Week() {
             {tasks.map((o) => {
               const member = state.members.find((m) => m.id === o.assignee);
               return (
-                <button key={o.id} className={`week-task ${o.status}`} onClick={() => o.status === 'todo' && setEditing(o)}>
+                <button key={o.id} className={`week-task ${o.status}`} onClick={() => setEditing(o)}>
                   <span className="week-task-zone" aria-hidden>{ZONE_META[o.zone].emoji}</span>
                   <span className="week-task-title">{o.title}</span>
                   {member && <Creature species={member.creature} size={26} />}
@@ -74,10 +74,35 @@ export function Week() {
 function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
   const state = useStore((s) => s.state);
   const moveOccurrence = useStore((s) => s.moveOccurrence);
+  const undoOccurrence = useStore((s) => s.undoOccurrence);
   if (!state) return null;
   const adults = state.members.filter((m) => m.role === 'adult');
   const isChildTask = state.members.find((m) => m.id === occ.assignee)?.role === 'child';
   const days = Array.from({ length: 7 }, (_, i) => addDays(state.weekStart, i));
+
+  if (occ.status === 'done') {
+    return (
+      <div className="sheet-backdrop" onClick={onClose}>
+        <div className="sheet" onClick={(e) => e.stopPropagation()}>
+          <div className="sheet-handle" />
+          <h3>{occ.title}</h3>
+          <p className="muted">Cette mission est marquée faite. Coché par erreur ?</p>
+          <button
+            className="btn secondary sheet-close"
+            onClick={() => {
+              void undoOccurrence(occ);
+              onClose();
+            }}
+          >
+            ↩️ Remettre à faire
+          </button>
+          <button className="btn ghost sheet-close" style={{ color: 'var(--encre-douce)' }} onClick={onClose}>
+            Fermer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>

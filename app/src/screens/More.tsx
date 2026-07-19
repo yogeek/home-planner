@@ -4,15 +4,18 @@ import { Creature } from '../components/Creature';
 import { ZONE_META } from '../zones';
 import { getToken } from '../api';
 import { pushSupported, subscribePush } from '../push';
+import { TaskSettings } from './TaskSettings';
 import './more.css';
 
 export function More() {
   const state = useStore((s) => s.state);
   const me = useMe();
   const setChildMode = useStore((s) => s.setChildMode);
+  const setDashboard = useStore((s) => s.setDashboard);
   const chooseMember = useStore((s) => s.chooseMember);
   const [pushStatus, setPushStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   if (!state || !me) return null;
   const adults = state.members.filter((m) => m.role === 'adult');
@@ -153,6 +156,12 @@ export function More() {
             🧸 Mode {child.name}
           </button>
         )}
+        <button className="btn secondary" onClick={() => setSettingsOpen(true)}>
+          🛠️ Régler les tâches du foyer
+        </button>
+        <button className="btn secondary" onClick={() => setDashboard(true)}>
+          🖼️ Mode tableau du foyer (tablette)
+        </button>
         <button className="btn secondary" onClick={share}>
           {copied ? 'Lien copié ! ✅' : '💌 Inviter sur cet appareil-là'}
         </button>
@@ -162,6 +171,8 @@ export function More() {
       </div>
 
       <p className="more-footer muted">Le Village · fait avec 🌰 pour la famille</p>
+
+      {settingsOpen && <TaskSettings onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }

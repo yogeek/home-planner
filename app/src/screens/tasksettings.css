@@ -1,0 +1,102 @@
+.tset-backdrop {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #2c4f44 0%, #1f3a33 100%);
+  z-index: 70;
+  overflow-y: auto;
+}
+
+.tset {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 16px calc(24px + var(--safe-bottom));
+}
+
+.tset-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.tset-head h2 {
+  color: var(--parchemin);
+  font-size: 1.3rem;
+}
+
+.tset-back {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+.tset-hint {
+  color: var(--mousse-claire);
+  margin: 0 2px 14px;
+  font-size: 0.85rem;
+}
+
+.tset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tset-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--parchemin);
+  border-radius: var(--radius-s);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-soft);
+  text-align: left;
+  color: var(--encre-douce);
+}
+
+.tset-item.inactive {
+  opacity: 0.5;
+}
+
+.tset-zone {
+  font-size: 1.3rem;
+}
+
+.tset-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tset-title {
+  color: var(--encre);
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.tset-meta {
+  font-size: 0.78rem;
+}
+
+.tset-add {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.tset-sheet {
+  max-height: 86vh;
+}
+
+.tset-active {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 0.9rem;
+}
+
+.tset-active input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--miel);
+}
