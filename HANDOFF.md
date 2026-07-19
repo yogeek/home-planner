@@ -6,6 +6,17 @@
 
 Les 14 tâches du plan sont faites, plus deux vagues de retours de Guillaume (mode tableau opt-in + réglages ; catégories personnalisées + clairière + CRUD complet), plus une boucle d'évaluation par agents « famille » TERMINÉE avec succès.
 
+## 2e chantier panel (19/07) : foyer flexible, récolte, accessibilité — TERMINÉ
+
+Suite à un 2e panel de 5 foyers (parents débordés, famille recomposée/ados, parent solo, couple sans enfant, grand-mère), livré et déployé :
+- **Foyer flexible** : onboarding par profils-types (couple/solo/coloc/à composer) + constructeur libre N adultes/N enfants ; distribution généralisée (migration mentale : distributeWeek prend `adults: string[]`, `children: string[]`) ; gestion des habitants après coup (Plus → Gérer les habitants ; endpoints /members POST, PUT/DELETE). Garde-fou : 1 adulte minimum.
+- **Récolte commune** (remplace la balançoire) : `weekContributions` (remplace weekBalance), composant `Harvest`, contribution de chacun dans une semaine partagée, message d'entraide bienveillant, variante solo. `state.weekGlands` remplace `state.balance`.
+- **Explication des glands** : composant `GameInfo` (modale 1er lancement + bouton « ? » sur la jauge).
+- **Vue confortable** (gros texte) : classe `html.comfort`, toggle dans Plus, mémorisé.
+- **Vue « qui fait quoi »** en haut de la Semaine ; **carte de profil** en haut de Plus (changer de personne / mode enfant, avant noyés en bas) ; **palette de 32 emojis** cliquables pour les catégories.
+- Migrations : 0005 (group_id des tâches à plusieurs). Pas de nouvelle migration pour le foyer flexible.
+- Verdict panel après correctifs : Denise 9,5 · Léa&Karim 8,5 · Sophie&Bruno 8 · Marc 8 · Inès&Tom (blocages emoji + qui-fait-quoi corrigés). Souhait ouvert non implémenté : garde alternée (semaines paires/impaires) pour familles recomposées.
+
 ## Boucle d'évaluation agents « famille » (19/07, terminée)
 
 3 personas (Papa mobile pressé, Maman organisée/équité, Tablette+enfant 4 ans) sur environnements isolés (wrangler dev ports 8791-8793, --persist-to séparés). Résultat final : Papa SATISFAIT 8/10, Maman SATISFAITE 8,5/10, Tablette SATISFAIT 9/10 (tableau) et 8/10 (enfant), zéro bug bloquant observé. Correctifs issus des cycles : rayons de courses devinés par mots-clés (shared/aisles.ts, côté serveur ET client), quantités « ×n » au lieu du refus de doublon (migration 0004), fiche article (rayon/quantité), pénibilité visible dans Semaine, vraie case à cocher ronde, toasts de confirmation partout, message balançoire neutre à 0-0, choix de la personne (dont l'enfant) à l'ajout rapide, ajout rapide depuis Aujourd'hui, fermeture des fiches par Échap. Leçon méthodo : les « bugs » des tests concurrents sur une même base étaient des artefacts (isoler les testeurs), et exiger des agents un test UI-only (jamais de lecture du code source).

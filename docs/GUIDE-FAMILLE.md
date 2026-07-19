@@ -7,8 +7,10 @@ Votre lien secret de famille (à garder entre vous) :
 ## Premier lancement (2 minutes)
 
 1. Ouvre le lien secret ci-dessus sur ton téléphone.
-2. « Fonder notre village » : entrez vos prénoms et choisissez chacun votre créature (il y a un profil pour le petit).
-3. Sur l'écran « Qui es-tu ? », chacun choisit son profil sur SON téléphone (mémorisé ensuite).
+2. Choisis le type de foyer (couple, parent solo, colocation, ou à composer), puis ajoute chaque habitant : prénom, créature, et adulte ou enfant. Tu peux mettre autant d'adultes et d'enfants que tu veux.
+3. Sur l'écran « Qui es-tu ? », chacun choisit son profil sur SON téléphone (mémorisé ensuite). Pour rechanger de personne : onglet « Plus », carte « Tu es... » en haut → « Changer de personne ».
+
+Le foyer n'est pas figé : « Plus » → « 👪 Gérer les habitants » permet d'ajouter, modifier ou retirer un habitant à tout moment.
 
 C'est tout. Le village est né, la semaine est déjà organisée et répartie équitablement entre vous deux.
 
@@ -38,8 +40,12 @@ Dans « Plus » → « Activer sur cet appareil » : un résumé le matin (7h) e
 
 En bas de l'écran « Plus », la « ⚠️ Zone dangereuse » permet de réinitialiser complètement le village (habitants, glands, niveaux, historique, courses...). C'est définitif et ça concerne toute la famille : il faut taper EFFACER pour confirmer. Utile si vous voulez repartir de zéro après une période de test.
 
+## Confort de lecture
+
+Textes trop petits ? « Plus » → « 🔎 Confort de lecture » → « Vue confortable (gros texte) » agrandit toute l'application. Mémorisé sur l'appareil.
+
 ## La philosophie
 
-La balançoire de l'écran Village montre l'équilibre de la semaine entre vous deux. Si elle penche, ce n'est pas un tribunal : c'est une invitation à échanger une tâche. On construit le village ensemble, chacun à sa mesure.
+L'écran Village montre « la récolte de la semaine » : ce que chacun a apporté (enfant compris), réuni dans une même semaine partagée. Pas de compétition : c'est collectif. Les glands de toute la famille s'additionnent pour faire monter le village de niveau et débloquer des embellissements. Un petit mot d'entraide apparaît seulement si quelqu'un a beaucoup porté. On construit le village ensemble, chacun à sa mesure. (Le bouton « ? » sur la jauge réexplique tout à tout moment.)
 
 Bon jeu ! 🦊🦉🐼
