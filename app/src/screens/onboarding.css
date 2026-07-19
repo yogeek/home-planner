@@ -126,3 +126,136 @@
   color: var(--danger);
   font-weight: 700;
 }
+
+/* Profils-types */
+.ob-profils {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ob-profil {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: var(--blanc);
+  border: 2px solid var(--parchemin-2);
+  border-radius: var(--radius-s);
+  padding: 14px 10px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.ob-profil:hover,
+.ob-profil:focus-visible {
+  border-color: var(--miel);
+  transform: translateY(-2px);
+}
+
+.ob-profil-emoji {
+  font-size: 1.8rem;
+}
+
+.ob-profil-label {
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--encre);
+}
+
+.ob-profil-desc {
+  font-size: 0.72rem;
+  color: var(--encre-douce);
+  line-height: 1.2;
+}
+
+/* Constructeur d'habitants */
+.ob-builder {
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.ob-members {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.ob-member {
+  background: var(--blanc);
+  border-radius: var(--radius-s);
+  padding: 12px;
+  border: 1px solid var(--parchemin-2);
+}
+
+.ob-member-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ob-member-name {
+  flex: 1;
+  margin: 0;
+  text-align: left;
+}
+
+.ob-remove {
+  color: var(--encre-douce);
+  font-size: 1rem;
+  padding: 8px 10px;
+  border-radius: 50%;
+}
+
+.ob-role-row {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.ob-role {
+  flex: 1;
+  padding: 7px;
+  border-radius: 999px;
+  border: 2px solid var(--parchemin-2);
+  font-size: 0.85rem;
+  color: var(--encre-douce);
+}
+
+.ob-role.active {
+  border-color: var(--miel);
+  background: rgba(232, 165, 72, 0.15);
+  color: var(--encre);
+  font-weight: 700;
+}
+
+.ob-creature-strip {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.ob-creature-mini {
+  border-radius: 10px;
+  border: 2px solid transparent;
+  padding: 2px;
+  opacity: 0.7;
+}
+
+.ob-creature-mini.selected {
+  border-color: var(--miel);
+  opacity: 1;
+  background: var(--parchemin);
+}
+
+.ob-add-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ob-add-row .btn {
+  flex: 1;
+  font-size: 0.9rem;
+  padding: 10px;
+}

@@ -12,8 +12,8 @@ export async function generateWeek(env: Env, weekStart: string, fromDate?: strin
   const db = env.DB;
   const members = await getMembers(db);
   const adults = members.filter((m) => m.role === 'adult');
-  const child = members.find((m) => m.role === 'child') ?? null;
-  if (adults.length < 2) return;
+  const children = members.filter((m) => m.role === 'child');
+  if (adults.length < 1) return;
 
   const defs = await getTaskDefs(db, true);
   const weekEnd = addDays(weekStart, 6);
@@ -32,7 +32,12 @@ export async function generateWeek(env: Env, weekStart: string, fromDate?: strin
   const slots = expandWeek(defs, weekStart, seasonOf(weekStart)).filter(
     (s) => !keptDefDates.has(`${s.defId}|${s.date}`) && (!fromDate || s.date >= fromDate),
   );
-  const occurrences = distributeWeek(slots, [adults[0].id, adults[1].id], child?.id ?? null, lastAssignee);
+  const occurrences = distributeWeek(
+    slots,
+    adults.map((a) => a.id),
+    children.map((c) => c.id),
+    lastAssignee,
+  );
 
   const stmts: D1PreparedStatement[] = [
     db

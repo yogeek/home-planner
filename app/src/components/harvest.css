@@ -1,0 +1,70 @@
+.harvest {
+  text-align: center;
+}
+
+.harvest-title {
+  font-size: 1.05rem;
+  color: var(--foret);
+  margin: 0 0 10px;
+}
+
+.harvest-bar {
+  display: flex;
+  height: 20px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--parchemin-2);
+  box-shadow: inset 0 1px 3px rgba(31, 45, 34, 0.12);
+}
+
+.harvest-seg {
+  height: 100%;
+  transition: width 0.7s cubic-bezier(0.2, 0.8, 0.3, 1.1);
+  min-width: 4px;
+}
+
+.harvest-seg:first-child {
+  border-radius: 999px 0 0 999px;
+}
+.harvest-seg:last-child {
+  border-radius: 0 999px 999px 0;
+}
+
+.harvest-empty {
+  width: 100%;
+}
+
+.harvest-people {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 18px;
+  margin: 12px 0 4px;
+}
+
+.harvest-person {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+}
+
+.harvest-name {
+  font-weight: 700;
+  color: var(--encre);
+}
+
+.harvest-glands {
+  color: var(--miel-fonce);
+  font-weight: 700;
+}
+
+.harvest-total {
+  margin: 6px 0 4px;
+  font-size: 0.98rem;
+  color: var(--encre);
+}
+
+.harvest-hint {
+  margin: 2px 0 0;
+}

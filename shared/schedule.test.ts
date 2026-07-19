@@ -85,16 +85,26 @@ describe('distributeWeek', () => {
   }
 
   it('les tâches enfant vont à l\'enfant', () => {
-    const occs = distributeWeek([slot({ defId: 'jouets', childTask: true })], [A, B], KID, {});
+    const occs = distributeWeek([slot({ defId: 'jouets', childTask: true })], [A, B], [KID], {});
     expect(occs[0].assignee).toBe(KID);
   });
 
   it('sans enfant, les tâches enfant sont ignorées', () => {
-    expect(distributeWeek([slot({ defId: 'jouets', childTask: true })], [A, B], null, {})).toHaveLength(0);
+    expect(distributeWeek([slot({ defId: 'jouets', childTask: true })], [A, B], [], {})).toHaveLength(0);
+  });
+
+  it('répartit les tâches enfant entre plusieurs enfants', () => {
+    const K2 = 'kid2';
+    const slots = [
+      slot({ defId: 'j1', childTask: true, weight: 2 }),
+      slot({ defId: 'j2', childTask: true, weight: 2 }),
+    ];
+    const occs = distributeWeek(slots, [A, B], [KID, K2], {});
+    expect(new Set(occs.map((o) => o.assignee))).toEqual(new Set([KID, K2]));
   });
 
   it('fixedAssignee est respecté', () => {
-    const occs = distributeWeek([slot({ defId: 'poubelles', fixedAssignee: B })], [A, B], null, {});
+    const occs = distributeWeek([slot({ defId: 'poubelles', fixedAssignee: B })], [A, B], [], {});
     expect(occs[0].assignee).toBe(B);
   });
 
@@ -106,26 +116,47 @@ describe('distributeWeek', () => {
       slot({ defId: 'd', weight: 2 }),
       slot({ defId: 'e', weight: 2 }),
     ];
-    const occs = distributeWeek(slots, [A, B], null, {});
+    const occs = distributeWeek(slots, [A, B], [], {});
     const load = (m: string) => occs.filter((o) => o.assignee === m).reduce((s, o) => s + o.weight, 0);
     expect(Math.abs(load(A) - load(B))).toBeLessThanOrEqual(2);
   });
 
+  it('parent solo : tout va à l\'unique adulte', () => {
+    const slots = [slot({ defId: 'a', weight: 3 }), slot({ defId: 'b', weight: 2 })];
+    const occs = distributeWeek(slots, [A], [], {});
+    expect(occs.every((o) => o.assignee === A)).toBe(true);
+  });
+
+  it('trois adultes : la charge est répartie entre les trois', () => {
+    const C = 'carol';
+    const slots = Array.from({ length: 9 }, (_, i) => slot({ defId: `t${i}`, weight: 2 }));
+    const occs = distributeWeek(slots, [A, B, C], [], {});
+    const load = (m: string) => occs.filter((o) => o.assignee === m).reduce((s, o) => s + o.weight, 0);
+    expect(load(A)).toBeGreaterThan(0);
+    expect(load(B)).toBeGreaterThan(0);
+    expect(load(C)).toBeGreaterThan(0);
+    expect(Math.max(load(A), load(B), load(C)) - Math.min(load(A), load(B), load(C))).toBeLessThanOrEqual(2);
+  });
+
+  it('sans adulte, rien n\'est distribué', () => {
+    expect(distributeWeek([slot({ defId: 'a' })], [], [], {})).toHaveLength(0);
+  });
+
   it('fait tourner une corvée impopulaire (rotation vs lastAssignee)', () => {
     const slots = [slot({ defId: 'salle-de-bain', weight: 4 })];
-    const occs = distributeWeek(slots, [A, B], null, { 'salle-de-bain': A });
+    const occs = distributeWeek(slots, [A, B], [], { 'salle-de-bain': A });
     expect(occs[0].assignee).toBe(B);
   });
 
   it('est déterministe', () => {
     const slots = [slot({ defId: 'a', weight: 3 }), slot({ defId: 'b', weight: 3 })];
-    const r1 = distributeWeek(slots, [A, B], null, {});
-    const r2 = distributeWeek(slots, [A, B], null, {});
+    const r1 = distributeWeek(slots, [A, B], [], {});
+    const r2 = distributeWeek(slots, [A, B], [], {});
     expect(r1).toEqual(r2);
   });
 
   it('les occurrences produites sont complètes et en statut todo', () => {
-    const occs = distributeWeek([slot({ defId: 'a' })], [A, B], null, {});
+    const occs = distributeWeek([slot({ defId: 'a' })], [A, B], [], {});
     expect(occs[0]).toMatchObject({ defId: 'a', status: 'todo', zone: 'cuisine', weight: 2, date: WEEK });
     expect(occs[0].id).toBeTruthy();
   });

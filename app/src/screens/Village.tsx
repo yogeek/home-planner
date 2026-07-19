@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { VillageScene, timeOfDay } from '../components/VillageScene';
 import { Creature } from '../components/Creature';
+import { Harvest } from '../components/Harvest';
 import { ZONE_META, catInfo } from '../zones';
 import { LEVELS } from '@shared/village';
 import type { Zone } from '../types';
@@ -28,13 +29,10 @@ export function Village() {
   }, [celebration]);
 
   if (!state) return null;
-  const { village, members, balance } = state;
+  const { village, members } = state;
   const info = village.levelInfo;
   const nextUnlock = info.level < LEVELS.length ? LEVELS[info.level] : null;
-  const adults = members.filter((m) => m.role === 'adult');
   const time = timeOfDay(new Date(state.now));
-
-  const tilt = balance ? (0.5 - balance.ratio) * 24 : 0;
 
   return (
     <div className={`screen village-screen sky-${time}`}>
@@ -83,32 +81,10 @@ export function Village() {
         )}
       </div>
 
-      {/* Balançoire d'équilibre */}
-      {balance && adults.length === 2 && (
-        <div className="card seesaw-card">
-          <p className="seesaw-title display">L'équilibre de la semaine</p>
-          <div className="seesaw">
-            <div className="seesaw-plank" style={{ transform: `rotate(${tilt}deg)` }}>
-              <div className="seesaw-side">
-                <Creature species={adults[0].creature} size={40} />
-                <span>{balance.totals[adults[0].id]} 🌰</span>
-              </div>
-              <div className="seesaw-side">
-                <Creature species={adults[1].creature} size={40} />
-                <span>{balance.totals[adults[1].id]} 🌰</span>
-              </div>
-            </div>
-            <div className="seesaw-base" />
-          </div>
-          <p className="muted seesaw-hint">
-            {balance.totals[adults[0].id] + balance.totals[adults[1].id] === 0
-              ? 'La semaine commence : première mission cochée, premier gland !'
-              : Math.abs(tilt) < 4
-                ? 'Bel équilibre, continuez comme ça !'
-                : `${balance.ratio > 0.5 ? adults[0].name : adults[1].name} porte plus cette semaine. Un petit coup de main ?`}
-          </p>
-        </div>
-      )}
+      {/* La récolte commune : ce que chacun a apporté cette semaine */}
+      <div className="card">
+        <Harvest members={members} weekGlands={state.weekGlands} />
+      </div>
 
       {sheetZone && <ZoneSheet zone={sheetZone} onClose={() => setSheetZone(null)} />}
     </div>

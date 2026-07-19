@@ -7,6 +7,7 @@ import { useEscape } from '../useEscape';
 import type { AppState } from '../types';
 import { pushSupported, subscribePush } from '../push';
 import { TaskSettings } from './TaskSettings';
+import { MembersManager } from './MembersManager';
 import './more.css';
 
 export function More() {
@@ -18,12 +19,12 @@ export function More() {
   const [pushStatus, setPushStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
 
   if (!state || !me) return null;
-  const adults = state.members.filter((m) => m.role === 'adult');
-  const child = state.members.find((m) => m.role === 'child');
-  const balance = state.balance;
+  const members = state.members;
+  const child = members.find((m) => m.role === 'child');
 
   const weekDone = state.week
     .filter((o) => o.status === 'done')
@@ -60,7 +61,8 @@ export function More() {
     setTimeout(() => setCopied(false), 2500);
   }
 
-  const total = balance ? balance.totals[adults[0].id] + balance.totals[adults[1].id] : 0;
+  const doneThisWeek = state.week.filter((o) => o.status === 'done').length;
+  const monthTotal = (m: { id: string }) => state.monthTotals[m.id]?.total ?? 0;
 
   return (
     <div className="screen more-screen">
@@ -68,41 +70,32 @@ export function More() {
         <h2>Le coin du soir</h2>
       </div>
 
-      {/* Équilibre détaillé */}
-      {balance && adults.length === 2 && (
-        <div className="card more-card">
-          <h3>⚖️ L'équilibre en détail</h3>
-          <p className="muted">
-            Cette semaine, vous avez accompli{' '}
-            <strong>{state.week.filter((o) => o.status === 'done').length}</strong> mission
-            {state.week.filter((o) => o.status === 'done').length > 1 ? 's' : ''} ensemble.
-          </p>
-          <div className="bal-duo">
-            {adults.map((a) => {
-              const v = balance.totals[a.id];
-              const pct = total === 0 ? 50 : Math.round((v / total) * 100);
-              return (
-                <div key={a.id} className="bal-row">
-                  <Creature species={a.creature} size={32} />
-                  <div className="bal-bar">
-                    <div className="bal-fill" style={{ width: `${Math.max(4, pct)}%`, background: a.color }} />
-                  </div>
-                  <span className="bal-num">
-                    {v} 🌰
-                  </span>
+      {/* La récolte de la semaine, en détail */}
+      <div className="card more-card">
+        <h3>🌾 La récolte en détail</h3>
+        <p className="muted">
+          Cette semaine, vous avez accompli <strong>{doneThisWeek}</strong> mission{doneThisWeek > 1 ? 's' : ''}{' '}
+          ensemble.
+        </p>
+        <div className="bal-duo">
+          {members.map((a) => {
+            const v = state.weekGlands[a.id] ?? 0;
+            const maxG = Math.max(1, ...members.map((m) => state.weekGlands[m.id] ?? 0));
+            return (
+              <div key={a.id} className="bal-row">
+                <Creature species={a.creature} size={32} />
+                <div className="bal-bar">
+                  <div className="bal-fill" style={{ width: `${Math.max(4, (v / maxG) * 100)}%`, background: a.color }} />
                 </div>
-              );
-            })}
-          </div>
-          <p className="muted bal-month">
-            Sur les 4 dernières semaines :{' '}
-            {adults
-              .map((a) => `${a.name} ${state.monthTotals[a.id]?.total ?? 0} 🌰`)
-              .join(' · ')}
-            {child && state.monthTotals[child.id] ? ` · ${child.name} ${state.monthTotals[child.id].total} 🌰` : ''}
-          </p>
+                <span className="bal-num">{v} 🌰</span>
+              </div>
+            );
+          })}
         </div>
-      )}
+        <p className="muted bal-month">
+          Sur les 4 dernières semaines : {members.map((m) => `${m.name} ${monthTotal(m)} 🌰`).join(' · ')}
+        </p>
+      </div>
 
       {/* Ma série */}
       {myProgress && (
@@ -159,6 +152,9 @@ export function More() {
             🧸 Mode {child.name}
           </button>
         )}
+        <button className="btn secondary" onClick={() => setMembersOpen(true)}>
+          👪 Gérer les habitants
+        </button>
         <button className="btn secondary" onClick={() => setSettingsOpen(true)}>
           🛠️ Régler les tâches du foyer
         </button>
@@ -188,6 +184,7 @@ export function More() {
       <p className="more-footer muted">Le Village · fait avec 🌰 pour la famille</p>
 
       {settingsOpen && <TaskSettings onClose={() => setSettingsOpen(false)} />}
+      {membersOpen && <MembersManager onClose={() => setMembersOpen(false)} />}
       {resetOpen && <ResetSheet onClose={() => setResetOpen(false)} />}
     </div>
   );

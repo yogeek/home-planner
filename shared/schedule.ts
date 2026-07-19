@@ -45,12 +45,16 @@ export function expandWeek(defs: TaskDef[], weekStart: string, season: 'summer' 
 
 export function distributeWeek(
   slots: Slot[],
-  adults: [string, string],
-  childId: string | null,
+  adults: string[],
+  children: string[],
   lastAssignee: Record<string, string>,
 ): Occurrence[] {
   const occurrences: Occurrence[] = [];
-  const load: Record<string, number> = { [adults[0]]: 0, [adults[1]]: 0 };
+  if (adults.length === 0) return occurrences;
+  const load: Record<string, number> = {};
+  for (const a of adults) load[a] = 0;
+  const childLoad: Record<string, number> = {};
+  for (const c of children) childLoad[c] = 0;
 
   const toOcc = (slot: Slot, assignee: string, idx: number): Occurrence => ({
     id: `${slot.date}-${slot.defId}-${idx}`,
@@ -68,11 +72,23 @@ export function distributeWeek(
     (a, b) => b.weight - a.weight || a.defId.localeCompare(b.defId) || a.date.localeCompare(b.date),
   );
 
+  /** Personne la moins chargée ; à égalité, rotation (éviter celui qui l'a fait la dernière fois) */
+  const pickLeast = (candidates: string[], loadMap: Record<string, number>, defId: string): string => {
+    const min = Math.min(...candidates.map((c) => loadMap[c]));
+    const tied = candidates.filter((c) => loadMap[c] === min);
+    if (tied.length === 1) return tied[0];
+    const last = lastAssignee[defId];
+    return tied.find((c) => c !== last) ?? tied[0];
+  };
+
   let idx = 0;
   for (const slot of sorted) {
     idx++;
     if (slot.childTask) {
-      if (childId) occurrences.push(toOcc(slot, childId, idx));
+      if (children.length === 0) continue;
+      const pick = pickLeast(children, childLoad, slot.defId);
+      occurrences.push(toOcc(slot, pick, idx));
+      childLoad[pick] += slot.weight;
       continue;
     }
     if (slot.fixedAssignee) {
@@ -80,15 +96,7 @@ export function distributeWeek(
       if (slot.fixedAssignee in load) load[slot.fixedAssignee] += slot.weight;
       continue;
     }
-    const [a, b] = adults;
-    let pick: string;
-    if (load[a] < load[b]) pick = a;
-    else if (load[b] < load[a]) pick = b;
-    else {
-      // Égalité : rotation, celui qui ne l'a pas faite la dernière fois
-      const last = lastAssignee[slot.defId];
-      pick = last === a ? b : a;
-    }
+    const pick = pickLeast(adults, load, slot.defId);
     occurrences.push(toOcc(slot, pick, idx));
     load[pick] += slot.weight;
   }

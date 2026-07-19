@@ -46,6 +46,10 @@ interface Store {
   updateShoppingItem: (item: ShoppingItem, changes: { aisle?: string; qty?: number }) => Promise<void>;
   checkoutShopping: () => Promise<void>;
 
+  addMember: (data: { name: string; creature: string; role: 'adult' | 'child' }) => Promise<void>;
+  updateMember: (id: string, data: { name?: string; creature?: string; role?: 'adult' | 'child' }) => Promise<void>;
+  removeMember: (id: string) => Promise<void>;
+
   info: string | null;
   notifyInfo: (msg: string) => void;
   clearError: () => void;
@@ -288,6 +292,28 @@ export const useStore = create<Store>((set, get) => ({
 
   checkoutShopping: async () => {
     await shoppingMutation(get, set, (items) => items.filter((i) => i.status !== 'checked'), '/shopping/checkout', {});
+  },
+
+  addMember: async (data) => {
+    try {
+      set({ state: await api('/members', { body: data }) });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Erreur' });
+    }
+  },
+  updateMember: async (id, data) => {
+    try {
+      set({ state: await api(`/members/${id}`, { method: 'PUT', body: data }) });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Erreur' });
+    }
+  },
+  removeMember: async (id) => {
+    try {
+      set({ state: await api(`/members/${id}`, { method: 'DELETE', body: {} }) });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Erreur' });
+    }
   },
 
   info: null,

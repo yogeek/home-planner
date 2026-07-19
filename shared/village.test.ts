@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { levelFor, freshness, weekBalance, updateStreak, LEVELS } from './village';
+import { levelFor, freshness, weekContributions, updateStreak, LEVELS } from './village';
 import type { Occurrence, MemberProgress } from './types';
 
 describe('levelFor', () => {
@@ -47,7 +47,7 @@ describe('freshness', () => {
   });
 });
 
-describe('weekBalance', () => {
+describe('weekContributions', () => {
   const occ = (assignee: string, weight: number, status: 'done' | 'todo' = 'done'): Occurrence => ({
     id: Math.random().toString(),
     defId: null,
@@ -59,14 +59,13 @@ describe('weekBalance', () => {
     status,
   });
 
-  it('somme les poids des tâches faites par adulte', () => {
-    const b = weekBalance([occ('a', 3), occ('a', 2), occ('b', 4), occ('b', 1, 'todo')], ['a', 'b']);
-    expect(b.totals).toEqual({ a: 5, b: 4 });
-    expect(b.ratio).toBeCloseTo(5 / 9);
+  it('somme les glands faits par chaque membre (todo ignoré)', () => {
+    const c = weekContributions([occ('a', 3), occ('a', 2), occ('b', 4), occ('b', 1, 'todo'), occ('kid', 1)], ['a', 'b', 'kid']);
+    expect(c).toEqual({ a: 5, b: 4, kid: 1 });
   });
 
-  it('ratio 0.5 quand personne n\'a rien fait', () => {
-    expect(weekBalance([], ['a', 'b']).ratio).toBe(0.5);
+  it('tous les membres présents, même à zéro', () => {
+    expect(weekContributions([], ['a', 'b', 'c'])).toEqual({ a: 0, b: 0, c: 0 });
   });
 });
 

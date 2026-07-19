@@ -59,19 +59,14 @@ export function freshness(lastDoneISO: string | null, nowISO: string): number {
   return Math.max(FLOOR, Math.round(100 - days * DECAY_PER_DAY));
 }
 
-export interface Balance {
-  totals: Record<string, number>;
-  /** part du premier adulte, 0.5 = équilibre parfait */
-  ratio: number;
-}
-
-export function weekBalance(occurrences: Occurrence[], adults: [string, string]): Balance {
-  const totals: Record<string, number> = { [adults[0]]: 0, [adults[1]]: 0 };
+/** Glands récoltés cette semaine par chaque membre (tâches faites, pondérées). Tous les membres. */
+export function weekContributions(occurrences: Occurrence[], memberIds: string[]): Record<string, number> {
+  const totals: Record<string, number> = {};
+  for (const id of memberIds) totals[id] = 0;
   for (const o of occurrences) {
     if (o.status === 'done' && o.assignee in totals) totals[o.assignee] += o.weight;
   }
-  const sum = totals[adults[0]] + totals[adults[1]];
-  return { totals, ratio: sum === 0 ? 0.5 : totals[adults[0]] / sum };
+  return totals;
 }
 
 export function updateStreak(progress: MemberProgress, doneDateLocal: string): MemberProgress {

@@ -1,6 +1,6 @@
 import type { Env } from './index';
 import { localDate, weekStart, addDays } from '../shared/dates';
-import { freshness, levelFor, updateStreak, weekBalance } from '../shared/village';
+import { freshness, levelFor, updateStreak, weekContributions } from '../shared/village';
 import { suggest, frequentItems } from '../shared/shopping';
 import { DEFAULT_TASK_DEFS } from '../shared/defaults';
 import { AISLES, SCENE_ZONES } from '../shared/types';
@@ -66,7 +66,6 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
     getCategories(db),
   ]);
 
-  const adults = members.filter((m) => m.role === 'adult');
   const { results: monthRows } = await db
     .prepare(
       "SELECT assignee, SUM(weight) AS total, COUNT(*) AS n FROM occurrences WHERE status = 'done' AND date >= ? GROUP BY assignee",
@@ -96,7 +95,7 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
     suggestions: suggest(purchases, now),
     frequent: frequentItems(purchases),
     progress,
-    balance: adults.length >= 2 ? weekBalance(weekOccs, [adults[0].id, adults[1].id]) : null,
+    weekGlands: weekContributions(weekOccs, members.map((m) => m.id)),
     monthTotals,
     taskDefs,
     categories,
@@ -176,6 +175,67 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       stmts.push(db.prepare("INSERT INTO village (id, acorns, zone_last_done) VALUES (1, 0, '{}')"));
       await db.batch(stmts);
       await generateWeek(env, weekStart(localDate(now)), localDate(now));
+      notify();
+      return json(await buildState(env));
+    }
+
+    // Ajouter un habitant
+    if (path === '/members' && method === 'POST') {
+      const body = await readBody(request);
+      const name = (body.name as string)?.trim();
+      const creature = (body.creature as string)?.trim();
+      const role = body.role === 'child' ? 'child' : 'adult';
+      if (!name || !creature) return json({ error: 'Nom et créature requis' }, 400);
+      const id = crypto.randomUUID();
+      await db.batch([
+        db
+          .prepare('INSERT INTO members (id, name, creature, role, color, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+          .bind(id, name, creature, role, CREATURE_COLORS[creature] ?? '#3E5C40', new Date().toISOString()),
+        db.prepare('INSERT INTO progress (member_id) VALUES (?)').bind(id),
+      ]);
+      // Un nouvel habitant peut recevoir des tâches : on régénère la semaine en cours (à partir d'aujourd'hui)
+      const today = localDate(new Date().toISOString());
+      await generateWeek(env, weekStart(today), today);
+      notify();
+      return json(await buildState(env));
+    }
+
+    // Éditer ou retirer un habitant
+    const memberIdMatch = path.match(/^\/members\/([^/]+)$/);
+    if (memberIdMatch && (method === 'PUT' || method === 'DELETE')) {
+      const members = await getMembers(db);
+      const member = members.find((m) => m.id === memberIdMatch[1]);
+      if (!member) return json({ error: 'Habitant introuvable' }, 404);
+
+      if (method === 'DELETE') {
+        const adults = members.filter((m) => m.role === 'adult');
+        if (member.role === 'adult' && adults.length <= 1) {
+          return json({ error: 'Il faut au moins un adulte dans le foyer' }, 400);
+        }
+        await db.batch([
+          db.prepare('DELETE FROM occurrences WHERE assignee = ?').bind(member.id),
+          db.prepare('DELETE FROM push_subs WHERE member_id = ?').bind(member.id),
+          db.prepare('DELETE FROM progress WHERE member_id = ?').bind(member.id),
+          db.prepare('UPDATE task_defs SET fixed_assignee = NULL WHERE fixed_assignee = ?').bind(member.id),
+          db.prepare('DELETE FROM members WHERE id = ?').bind(member.id),
+        ]);
+        const today = localDate(new Date().toISOString());
+        await generateWeek(env, weekStart(today), today);
+      } else {
+        const body = await readBody(request);
+        const name = ((body.name as string) ?? member.name).trim() || member.name;
+        const creature = ((body.creature as string) ?? member.creature).trim() || member.creature;
+        const role = body.role === undefined ? member.role : body.role === 'child' ? 'child' : 'adult';
+        // Empêcher de retirer le dernier adulte via un changement de rôle
+        if (member.role === 'adult' && role === 'child') {
+          const adults = members.filter((m) => m.role === 'adult');
+          if (adults.length <= 1) return json({ error: 'Il faut au moins un adulte dans le foyer' }, 400);
+        }
+        await db
+          .prepare('UPDATE members SET name = ?, creature = ?, role = ?, color = ? WHERE id = ?')
+          .bind(name, creature, role, CREATURE_COLORS[creature] ?? member.color, member.id)
+          .run();
+      }
       notify();
       return json(await buildState(env));
     }

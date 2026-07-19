@@ -7,10 +7,10 @@ import type {
   TaskDef,
   Zone,
 } from '@shared/types';
-import type { LevelInfo, Balance } from '@shared/village';
+import type { LevelInfo } from '@shared/village';
 
 export type { Category, Member, MemberProgress, Occurrence, ShoppingItem, TaskDef, Zone };
-export type { LevelInfo, Balance };
+export type { LevelInfo };
 
 export interface AppState {
   now: string;
@@ -29,7 +29,8 @@ export interface AppState {
   suggestions: string[];
   frequent: string[];
   progress: MemberProgress[];
-  balance: Balance | null;
+  /** Glands récoltés cette semaine par membre (id → glands) */
+  weekGlands: Record<string, number>;
   monthTotals: Record<string, { total: number; count: number }>;
   taskDefs: TaskDef[];
   categories: Category[];
