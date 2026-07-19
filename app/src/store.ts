@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { api, getMemberId, setMemberId } from './api';
 import { enqueue, flushQueue, loadCache, saveCache } from './offline';
 import { catInfo } from './zones';
+import { guessAisle } from '@shared/aisles';
 import type { AppState, Occurrence, ShoppingItem, Zone } from './types';
 
 export type TabId = 'village' | 'jour' | 'semaine' | 'courses' | 'plus';
@@ -224,7 +225,8 @@ export const useStore = create<Store>((set, get) => ({
     const temp: ShoppingItem = {
       id: `local-${Date.now()}`,
       label,
-      aisle: (aisle as ShoppingItem['aisle']) ?? 'autre',
+      // Rayon deviné localement : affichage instantané, et correct même hors ligne
+      aisle: (aisle as ShoppingItem['aisle']) ?? guessAisle(label),
       status: 'open',
       qty: 1,
       addedBy: get().memberId ?? '',

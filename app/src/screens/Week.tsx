@@ -12,6 +12,7 @@ const DAY_NAMES = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 
 export function Week() {
   const state = useStore((s) => s.state);
   const applyState = useStore((s) => s.applyState);
+  const notifyInfo = useStore((s) => s.notifyInfo);
   const [editing, setEditing] = useState<Occurrence | null>(null);
   const [adding, setAdding] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -23,6 +24,7 @@ export function Week() {
     setBusy(true);
     try {
       applyState(await api('/week/regenerate', { body: {} }));
+      notifyInfo('Semaine rééquilibrée ⚖️');
     } finally {
       setBusy(false);
     }
@@ -77,6 +79,7 @@ function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
   const undoOccurrence = useStore((s) => s.undoOccurrence);
   const editOccurrence = useStore((s) => s.editOccurrence);
   const deleteOccurrence = useStore((s) => s.deleteOccurrence);
+  const notifyInfo = useStore((s) => s.notifyInfo);
   const [editMode, setEditMode] = useState(false);
   const [title, setTitle] = useState(occ.title);
   const [weight, setWeight] = useState(occ.weight);
@@ -139,6 +142,7 @@ function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
             disabled={!title.trim()}
             onClick={() => {
               void editOccurrence(occ, { title: title.trim(), zone, weight });
+              notifyInfo(`« ${title.trim()} » modifiée ✏️`);
               onClose();
             }}
           >
@@ -204,6 +208,7 @@ function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
               className="move-chip danger"
               onClick={() => {
                 void deleteOccurrence(occ);
+                notifyInfo(`« ${occ.title} » supprimée 🗑️`);
                 onClose();
               }}
             >
@@ -219,17 +224,21 @@ function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
   );
 }
 
-function AddSheet({ onClose }: { onClose: () => void }) {
+export function AddSheet({ onClose }: { onClose: () => void }) {
   const state = useStore((s) => s.state);
   const addOccurrence = useStore((s) => s.addOccurrence);
+  const notifyInfo = useStore((s) => s.notifyInfo);
   const memberId = useStore((s) => s.memberId);
   const [title, setTitle] = useState('');
   const [zone, setZone] = useState('rangement');
+  const [assignee, setAssignee] = useState(memberId ?? '');
   if (!state) return null;
 
   async function submit() {
     if (!title.trim()) return;
-    await addOccurrence({ title: title.trim(), zone, assignee: memberId ?? undefined });
+    const who = state!.members.find((m) => m.id === assignee);
+    await addOccurrence({ title: title.trim(), zone, assignee: assignee || undefined });
+    notifyInfo(`« ${title.trim()} » ajoutée pour ${who?.name ?? 'toi'} ✅`);
     onClose();
   }
 
@@ -254,10 +263,22 @@ function AddSheet({ onClose }: { onClose: () => void }) {
             </button>
           ))}
         </div>
+        <p className="muted">Pour qui ?</p>
+        <div className="move-row wrap">
+          {state.members.map((m) => (
+            <button
+              key={m.id}
+              className={`move-chip ${assignee === m.id ? 'active' : ''}`}
+              onClick={() => setAssignee(m.id)}
+            >
+              <Creature species={m.creature} size={26} /> {m.name}
+            </button>
+          ))}
+        </div>
         <button className="btn sheet-close" disabled={!title.trim()} onClick={() => void submit()}>
-          Ajouter (pour moi, aujourd'hui)
+          Ajouter (aujourd'hui)
         </button>
-        <p className="muted week-add-hint">Tu pourras la déplacer ou la proposer ensuite depuis la semaine.</p>
+        <p className="muted week-add-hint">Tu pourras la déplacer ou la modifier ensuite depuis la semaine.</p>
       </div>
     </div>
   );

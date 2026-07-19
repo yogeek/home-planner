@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore, useMe } from '../store';
 import { Creature } from '../components/Creature';
+import { AddSheet } from './Week';
 import { catInfo } from '../zones';
 import { addDays } from '@shared/dates';
 import type { Occurrence } from '../types';
@@ -9,6 +10,7 @@ import './today.css';
 export function Today() {
   const state = useStore((s) => s.state);
   const me = useMe();
+  const [adding, setAdding] = useState(false);
   if (!state || !me) return null;
 
   const mine = state.week
@@ -50,6 +52,11 @@ export function Today() {
           <TaskCard key={o.id} occ={o} />
         ))}
       </div>
+
+      <button className="btn secondary today-add" onClick={() => setAdding(true)}>
+        + Ajouter une tâche pour aujourd'hui
+      </button>
+      {adding && <AddSheet onClose={() => setAdding(false)} />}
 
       {(partnerDone.length > 0 || childToday.length > 0) && (
         <>
