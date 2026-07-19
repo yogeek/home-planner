@@ -1,0 +1,151 @@
+.child-mode {
+  height: 100%;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #7db4d8 0%, #a8d4b8 70%, #8fbc8f 100%);
+  padding: 20px;
+  position: relative;
+  text-align: center;
+}
+
+.child-exit {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  font-size: 1.4rem;
+  opacity: 0.6;
+  padding: 8px;
+  z-index: 10;
+}
+
+.child-hero h1 {
+  color: #1f3a33;
+  font-size: 1.5rem;
+  margin-top: 4px;
+}
+
+.child-hero.dance svg {
+  animation: dance 0.5s ease infinite alternate;
+}
+
+@keyframes dance {
+  from {
+    transform: rotate(-6deg) translateY(0);
+  }
+  to {
+    transform: rotate(6deg) translateY(-8px);
+  }
+}
+
+.child-none {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: #1f3a33;
+}
+
+.child-missions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 420px;
+  margin: 16px auto 0;
+}
+
+.child-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--blanc);
+  border-radius: 26px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease;
+}
+
+.child-card:active {
+  transform: scale(0.97);
+}
+
+.child-card.done {
+  opacity: 0.65;
+  background: #e8f4e8;
+}
+
+.child-emoji {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.child-title {
+  flex: 1;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--encre);
+}
+
+.child-star {
+  font-size: 2rem;
+  animation: star-pop 0.5s ease;
+}
+
+@keyframes star-pop {
+  from {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.4);
+  }
+}
+
+.child-validate {
+  text-align: center;
+  border-radius: 24px;
+  margin: auto 16px calc(30vh);
+}
+
+.child-validate h3 {
+  font-size: 1.5rem;
+}
+
+.child-validators {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+/* Confettis */
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.confetto {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+  animation: confetti-fall 2s ease-in forwards;
+}
+
+.confetto.c0 { background: #e8a548; }
+.confetto.c1 { background: #d97b93; }
+.confetto.c2 { background: #7fa8c9; }
+.confetto.c3 { background: #6e9075; }
+.confetto.c4 { background: #c96f4a; }
+.confetto.c5 { background: #8b6fae; }
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(540deg);
+    opacity: 0.6;
+  }
+}

@@ -1,0 +1,89 @@
+.more-screen {
+  background: linear-gradient(180deg, #2c4f44 0%, #1f3a33 100%);
+}
+
+.more-card {
+  margin-bottom: 12px;
+}
+
+.more-card h3 {
+  font-size: 1.05rem;
+  color: var(--foret);
+  margin-bottom: 6px;
+}
+
+.bal-duo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.bal-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bal-bar {
+  flex: 1;
+  height: 12px;
+  background: var(--parchemin-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bal-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.7s ease;
+}
+
+.bal-num {
+  font-weight: 700;
+  font-size: 0.85rem;
+  min-width: 48px;
+  text-align: right;
+}
+
+.bal-month {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+}
+
+.journal {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+}
+
+.journal li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 0.92rem;
+  border-bottom: 1px solid var(--parchemin-2);
+}
+
+.journal li:last-child {
+  border-bottom: none;
+}
+
+.push-status {
+  margin-top: 8px;
+}
+
+.more-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.more-footer {
+  text-align: center;
+  color: var(--mousse-claire);
+  opacity: 0.7;
+  margin-top: 8px;
+}

@@ -58,6 +58,15 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
   ]);
 
   const adults = members.filter((m) => m.role === 'adult');
+  const { results: monthRows } = await db
+    .prepare(
+      "SELECT assignee, SUM(weight) AS total, COUNT(*) AS n FROM occurrences WHERE status = 'done' AND date >= ? GROUP BY assignee",
+    )
+    .bind(addDays(today, -27))
+    .all();
+  const monthTotals: Record<string, { total: number; count: number }> = {};
+  for (const r of monthRows) monthTotals[r.assignee as string] = { total: r.total as number, count: r.n as number };
+
   const zoneFreshness: Record<string, number> = {};
   for (const zone of ZONES) zoneFreshness[zone] = freshness(village.zoneLastDone[zone] ?? null, now);
 
@@ -79,6 +88,7 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
     frequent: frequentItems(purchases),
     progress,
     balance: adults.length >= 2 ? weekBalance(weekOccs, [adults[0].id, adults[1].id]) : null,
+    monthTotals,
     taskDefs,
   };
 }

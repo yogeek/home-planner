@@ -29,5 +29,6 @@ export interface AppState {
   frequent: string[];
   progress: MemberProgress[];
   balance: Balance | null;
+  monthTotals: Record<string, { total: number; count: number }>;
   taskDefs: TaskDef[];
 }

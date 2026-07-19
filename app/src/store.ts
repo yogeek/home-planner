@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { api, getMemberId, setMemberId } from './api';
-import type { AppState, Occurrence, Zone } from './types';
+import { enqueue, flushQueue, loadCache, saveCache } from './offline';
+import type { AppState, Occurrence, ShoppingItem, Zone } from './types';
 
 export type TabId = 'village' | 'jour' | 'semaine' | 'courses' | 'plus';
 
@@ -31,7 +32,41 @@ interface Store {
   undoOccurrence: (occ: Occurrence) => Promise<void>;
   moveOccurrence: (occ: Occurrence, changes: { date?: string; assignee?: string }) => Promise<void>;
   addOccurrence: (data: { title: string; zone: Zone; weight?: number; date?: string; assignee?: string }) => Promise<void>;
+
+  addShoppingItem: (label: string, aisle?: string) => Promise<void>;
+  toggleShoppingItem: (item: ShoppingItem) => Promise<void>;
+  removeShoppingItem: (item: ShoppingItem) => Promise<void>;
+  checkoutShopping: () => Promise<void>;
+
   clearError: () => void;
+}
+
+/** Mutation avec repli hors ligne : applique localement, tente le réseau, sinon met en file */
+async function shoppingMutation(
+  get: () => Store,
+  set: (partial: Partial<Store>) => void,
+  localPatch: (items: ShoppingItem[]) => ShoppingItem[],
+  path: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const { state } = get();
+  if (state) {
+    set({ state: { ...state, shopping: localPatch(state.shopping) } });
+  }
+  try {
+    const s = await api(path, { body });
+    set({ state: s });
+    saveCache(s);
+  } catch (e) {
+    const status = e instanceof Error && 'status' in e ? (e as { status: number }).status : 0;
+    if (status >= 400 && status < 500) {
+      set({ error: e instanceof Error ? e.message : 'Erreur' });
+      void get().refresh();
+    } else {
+      // Hors ligne : on garde le changement local et on met en file
+      enqueue({ path, body });
+    }
+  }
 }
 
 export const useStore = create<Store>((set, get) => ({
@@ -51,15 +86,26 @@ export const useStore = create<Store>((set, get) => ({
     set({ memberId: id });
   },
 
-  applyState: (s) => set({ state: s }),
+  applyState: (s) => {
+    set({ state: s });
+    saveCache(s);
+  },
 
   refresh: async () => {
     try {
       set({ loading: get().state === null });
+      await flushQueue();
       const s = await api('/state');
       set({ state: s, loading: false });
+      saveCache(s);
     } catch (e) {
-      set({ loading: false, error: e instanceof Error ? e.message : 'Erreur' });
+      // Hors ligne : on repart du dernier état connu
+      const cached = get().state ?? loadCache<AppState>();
+      set({
+        loading: false,
+        state: cached,
+        error: cached ? null : e instanceof Error ? e.message : 'Erreur',
+      });
     }
   },
 
@@ -123,8 +169,68 @@ export const useStore = create<Store>((set, get) => ({
     }
   },
 
+  addShoppingItem: async (label, aisle) => {
+    const temp: ShoppingItem = {
+      id: `local-${Date.now()}`,
+      label,
+      aisle: (aisle as ShoppingItem['aisle']) ?? 'autre',
+      status: 'open',
+      addedBy: get().memberId ?? '',
+      addedAt: new Date().toISOString(),
+    };
+    await shoppingMutation(get, set, (items) => [...items, temp], '/shopping', {
+      label,
+      aisle,
+      byMemberId: get().memberId,
+    });
+  },
+
+  toggleShoppingItem: async (item) => {
+    const action = item.status === 'open' ? 'check' : 'uncheck';
+    if (item.id.startsWith('local-')) {
+      // article ajouté hors ligne : bascule locale uniquement, le vrai id viendra du refresh
+      const { state } = get();
+      if (state) {
+        set({
+          state: {
+            ...state,
+            shopping: state.shopping.map((i) =>
+              i.id === item.id ? { ...i, status: action === 'check' ? 'checked' : 'open' } : i,
+            ),
+          },
+        });
+      }
+      return;
+    }
+    await shoppingMutation(
+      get,
+      set,
+      (items) => items.map((i) => (i.id === item.id ? { ...i, status: action === 'check' ? 'checked' : 'open' } : i)),
+      `/shopping/${item.id}/${action}`,
+      {},
+    );
+  },
+
+  removeShoppingItem: async (item) => {
+    if (item.id.startsWith('local-')) {
+      const { state } = get();
+      if (state) set({ state: { ...state, shopping: state.shopping.filter((i) => i.id !== item.id) } });
+      return;
+    }
+    await shoppingMutation(get, set, (items) => items.filter((i) => i.id !== item.id), `/shopping/${item.id}/remove`, {});
+  },
+
+  checkoutShopping: async () => {
+    await shoppingMutation(get, set, (items) => items.filter((i) => i.status !== 'checked'), '/shopping/checkout', {});
+  },
+
   clearError: () => set({ error: null }),
 }));
+
+// Rejoue la file hors ligne dès que le réseau revient
+window.addEventListener('online', () => {
+  void useStore.getState().refresh();
+});
 
 /** Le membre courant */
 export function useMe() {

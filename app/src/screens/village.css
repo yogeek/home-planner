@@ -1,0 +1,290 @@
+.village-screen {
+  padding-top: 8px;
+}
+
+/* Le fond de l'écran suit le ciel de la scène */
+.sky-aube {
+  background: linear-gradient(180deg, #2e4a5e 0%, #6a5a58 60%, #1f3a33 100%);
+}
+.sky-jour {
+  background: linear-gradient(180deg, #5f97bd 0%, #4a7a6a 60%, #1f3a33 100%);
+}
+.sky-crepuscule {
+  background: linear-gradient(180deg, #3b3457 0%, #77465a 60%, #1f3a33 100%);
+}
+.sky-nuit {
+  background: linear-gradient(180deg, #0d1b2a 0%, #16302e 60%, #1f3a33 100%);
+}
+
+.app-shell:has(.sky-aube) { background: #2e4a5e; }
+.app-shell:has(.sky-jour) { background: #5f97bd; }
+.app-shell:has(.sky-crepuscule) { background: #3b3457; }
+.app-shell:has(.sky-nuit) { background: #0d1b2a; }
+
+.village-frame {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+}
+
+.village-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Zones interactives */
+.vz {
+  cursor: pointer;
+  transition: filter 0.6s ease, opacity 0.6s ease;
+}
+
+.vz-celebrate {
+  animation: zone-glow 1.6s ease;
+}
+
+@keyframes zone-glow {
+  0%, 100% {
+    filter: saturate(1);
+  }
+  25% {
+    filter: saturate(1.6) drop-shadow(0 0 10px #f6d989) brightness(1.15);
+  }
+  60% {
+    filter: saturate(1.4) drop-shadow(0 0 6px #f6d989) brightness(1.08);
+  }
+}
+
+/* Étoiles et lucioles */
+.star {
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+.star.s1 { animation-delay: 0.9s; }
+.star.s2 { animation-delay: 1.7s; }
+.star.s3 { animation-delay: 2.4s; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.firefly {
+  animation: drift 5.5s ease-in-out infinite;
+}
+.firefly.f1 { animation-delay: 1.2s; }
+.firefly.f2 { animation-delay: 2.1s; }
+.firefly.f3 { animation-delay: 3.4s; }
+.firefly.f4 { animation-delay: 4.2s; }
+
+@keyframes drift {
+  0%, 100% { opacity: 0.2; transform: translate(0, 0); }
+  30% { opacity: 1; transform: translate(4px, -6px); }
+  70% { opacity: 0.6; transform: translate(-3px, -10px); }
+}
+
+/* Fumée du lavoir */
+.puff {
+  animation: puff-rise 3s ease-out infinite;
+  transform-origin: center;
+}
+.puff.p1 { animation-delay: 1s; }
+.puff.p2 { animation-delay: 2s; }
+
+@keyframes puff-rise {
+  0% { opacity: 0.7; transform: translateY(0) scale(0.8); }
+  100% { opacity: 0; transform: translateY(-14px) scale(1.4); }
+}
+
+.decor {
+  animation: decor-pop 0.6s ease backwards;
+}
+
+@keyframes decor-pop {
+  from { opacity: 0; transform: scale(0.2); }
+}
+
+/* Gland qui s'envole vers la jauge */
+.acorn-fly {
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  font-size: 1.8rem;
+  animation: acorn-flight 1.25s cubic-bezier(0.3, -0.2, 0.4, 1) forwards;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes acorn-flight {
+  0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(-50%, -150px) scale(0.5) rotate(340deg); opacity: 0; }
+}
+
+/* Jauge */
+.gauge-card {
+  margin-bottom: 12px;
+}
+
+.gauge-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.gauge-level {
+  font-size: 1.15rem;
+  color: var(--foret);
+}
+
+.gauge-acorns {
+  font-size: 1.1rem;
+  color: var(--miel-fonce);
+}
+
+.gauge-bar {
+  height: 14px;
+  background: var(--parchemin-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.gauge-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--miel) 0%, var(--miel-fonce) 100%);
+  transition: width 0.8s cubic-bezier(0.2, 0.8, 0.3, 1.1);
+}
+
+.gauge-next {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+
+/* Balançoire */
+.seesaw-card {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.seesaw-title {
+  font-size: 1.05rem;
+  color: var(--foret);
+  margin: 0 0 6px;
+}
+
+.seesaw {
+  position: relative;
+  height: 92px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.seesaw-plank {
+  position: absolute;
+  bottom: 26px;
+  width: 230px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 8px solid #a8794f;
+  border-radius: 4px;
+  transition: transform 0.7s cubic-bezier(0.3, 1.2, 0.5, 1);
+  transform-origin: center bottom;
+  padding: 0 6px 2px;
+}
+
+.seesaw-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--encre-douce);
+}
+
+.seesaw-base {
+  width: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 26px solid #8a6a45;
+}
+
+.seesaw-hint {
+  margin: 6px 0 0;
+}
+
+/* Fiche de zone (bottom sheet) */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 27, 42, 0.5);
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+.sheet {
+  background: var(--parchemin);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 10px 20px calc(20px + var(--safe-bottom));
+  max-height: 70vh;
+  overflow-y: auto;
+  animation: sheet-up 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(60%); }
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--parchemin-2);
+  margin: 0 auto 12px;
+}
+
+.sheet h3 {
+  font-size: 1.25rem;
+  color: var(--foret);
+}
+
+.sheet-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.sheet-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--parchemin-2);
+}
+
+.sheet-list li.done .sheet-title {
+  text-decoration: line-through;
+  color: var(--encre-douce);
+}
+
+.sheet-title {
+  flex: 1;
+}
+
+.sheet-close {
+  width: 100%;
+  margin-top: 8px;
+}
