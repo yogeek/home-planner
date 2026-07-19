@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useStore, useMe } from '../store';
 import { Creature } from '../components/Creature';
-import { ZONE_META } from '../zones';
+import { catInfo } from '../zones';
 import { getToken } from '../api';
 import { pushSupported, subscribePush } from '../push';
 import { TaskSettings } from './TaskSettings';
@@ -129,7 +129,7 @@ export function More() {
               <li key={o.id}>
                 {who && <Creature species={who.creature} size={22} />}
                 <span>
-                  <strong>{who?.name}</strong> · {o.title} {ZONE_META[o.zone].emoji}
+                  <strong>{who?.name}</strong> · {o.title} {catInfo(state.categories, o.zone).emoji}
                 </span>
               </li>
             );

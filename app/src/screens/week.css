@@ -112,3 +112,9 @@
   min-width: 52px;
   justify-content: center;
 }
+
+.move-chip.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+  font-weight: 700;
+}

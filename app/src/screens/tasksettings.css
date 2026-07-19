@@ -100,3 +100,18 @@
   height: 18px;
   accent-color: var(--miel);
 }
+
+.tset-cats-head {
+  margin-top: 26px;
+}
+
+.tset-delete {
+  color: var(--danger);
+  margin-top: 6px;
+}
+
+.tset-emoji {
+  width: 76px;
+  margin: 0;
+  padding: 8px;
+}

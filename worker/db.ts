@@ -1,4 +1,5 @@
 import type {
+  Category,
   Member,
   MemberProgress,
   Occurrence,
@@ -115,6 +116,21 @@ export async function getVillage(db: D1Database): Promise<{ acorns: number; zone
   const r = await db.prepare('SELECT * FROM village WHERE id = 1').first();
   if (!r) return { acorns: 0, zoneLastDone: {} };
   return { acorns: r.acorns as number, zoneLastDone: JSON.parse((r.zone_last_done as string) || '{}') };
+}
+
+export function rowToCategory(r: Row): Category {
+  return {
+    id: r.id as string,
+    label: r.label as string,
+    emoji: r.emoji as string,
+    zone: r.zone as Category['zone'],
+    builtin: !!r.builtin,
+  };
+}
+
+export async function getCategories(db: D1Database): Promise<Category[]> {
+  const { results } = await db.prepare('SELECT * FROM categories ORDER BY builtin DESC, label').all();
+  return results.map(rowToCategory);
 }
 
 export async function getAllProgress(db: D1Database): Promise<MemberProgress[]> {

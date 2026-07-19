@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useStore } from '../store';
 import { Creature } from '../components/Creature';
-import { ZONE_META } from '../zones';
+import { catInfo } from '../zones';
 import { addDays } from '@shared/dates';
-import { ZONES } from '@shared/types';
 import { api } from '../api';
-import type { Occurrence, Zone } from '../types';
+import type { Occurrence } from '../types';
 import './week.css';
 
 const DAY_NAMES = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -51,7 +50,7 @@ export function Week() {
               const member = state.members.find((m) => m.id === o.assignee);
               return (
                 <button key={o.id} className={`week-task ${o.status}`} onClick={() => setEditing(o)}>
-                  <span className="week-task-zone" aria-hidden>{ZONE_META[o.zone].emoji}</span>
+                  <span className="week-task-zone" aria-hidden>{catInfo(state.categories, o.zone).emoji}</span>
                   <span className="week-task-title">{o.title}</span>
                   {member && <Creature species={member.creature} size={26} />}
                 </button>
@@ -75,6 +74,13 @@ function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
   const state = useStore((s) => s.state);
   const moveOccurrence = useStore((s) => s.moveOccurrence);
   const undoOccurrence = useStore((s) => s.undoOccurrence);
+  const editOccurrence = useStore((s) => s.editOccurrence);
+  const deleteOccurrence = useStore((s) => s.deleteOccurrence);
+  const [editMode, setEditMode] = useState(false);
+  const [title, setTitle] = useState(occ.title);
+  const [weight, setWeight] = useState(occ.weight);
+  const [zone, setZone] = useState(occ.zone);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   if (!state) return null;
   const adults = state.members.filter((m) => m.role === 'adult');
   const isChildTask = state.members.find((m) => m.id === occ.assignee)?.role === 'child';
@@ -98,6 +104,47 @@ function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
           </button>
           <button className="btn ghost sheet-close" style={{ color: 'var(--encre-douce)' }} onClick={onClose}>
             Fermer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (editMode) {
+    return (
+      <div className="sheet-backdrop" onClick={onClose}>
+        <div className="sheet" onClick={(e) => e.stopPropagation()}>
+          <div className="sheet-handle" />
+          <h3>Modifier la tâche</h3>
+          <input className="ob-input" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <p className="muted">Catégorie :</p>
+          <div className="move-row wrap">
+            {state.categories.map((c) => (
+              <button key={c.id} className={`move-chip ${zone === c.id ? 'active' : ''}`} onClick={() => setZone(c.id)}>
+                {c.emoji} {c.label}
+              </button>
+            ))}
+          </div>
+          <p className="muted">Pénibilité :</p>
+          <div className="move-row">
+            {[1, 2, 3, 4, 5].map((w) => (
+              <button key={w} className={`move-chip ${weight === w ? 'active' : ''}`} onClick={() => setWeight(w)}>
+                {w} 🌰
+              </button>
+            ))}
+          </div>
+          <button
+            className="btn sheet-close"
+            disabled={!title.trim()}
+            onClick={() => {
+              void editOccurrence(occ, { title: title.trim(), zone, weight });
+              onClose();
+            }}
+          >
+            Enregistrer
+          </button>
+          <button className="btn ghost sheet-close" style={{ color: 'var(--encre-douce)' }} onClick={() => setEditMode(false)}>
+            Retour
           </button>
         </div>
       </div>
@@ -143,6 +190,26 @@ function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
             </button>
           ))}
         </div>
+        <div className="move-row">
+          <button className="move-chip" onClick={() => setEditMode(true)}>
+            ✏️ Modifier
+          </button>
+          {!confirmDelete ? (
+            <button className="move-chip" onClick={() => setConfirmDelete(true)}>
+              🗑️ Supprimer
+            </button>
+          ) : (
+            <button
+              className="move-chip danger"
+              onClick={() => {
+                void deleteOccurrence(occ);
+                onClose();
+              }}
+            >
+              🗑️ Confirmer la suppression
+            </button>
+          )}
+        </div>
         <button className="btn secondary sheet-close" onClick={onClose}>
           Fermer
         </button>
@@ -156,7 +223,7 @@ function AddSheet({ onClose }: { onClose: () => void }) {
   const addOccurrence = useStore((s) => s.addOccurrence);
   const memberId = useStore((s) => s.memberId);
   const [title, setTitle] = useState('');
-  const [zone, setZone] = useState<Zone>('rangement');
+  const [zone, setZone] = useState('rangement');
   if (!state) return null;
 
   async function submit() {
@@ -178,11 +245,11 @@ function AddSheet({ onClose }: { onClose: () => void }) {
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && void submit()}
         />
-        <p className="muted">Zone du village :</p>
+        <p className="muted">Catégorie :</p>
         <div className="move-row wrap">
-          {ZONES.map((z) => (
-            <button key={z} className={`move-chip ${zone === z ? 'active' : ''}`} onClick={() => setZone(z)}>
-              {ZONE_META[z].emoji} {ZONE_META[z].label}
+          {state.categories.map((c) => (
+            <button key={c.id} className={`move-chip ${zone === c.id ? 'active' : ''}`} onClick={() => setZone(c.id)}>
+              {c.emoji} {c.label}
             </button>
           ))}
         </div>

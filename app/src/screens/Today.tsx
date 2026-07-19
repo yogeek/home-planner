@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useStore, useMe } from '../store';
 import { Creature } from '../components/Creature';
-import { ZONE_META } from '../zones';
+import { catInfo } from '../zones';
 import { addDays } from '@shared/dates';
 import type { Occurrence } from '../types';
 import './today.css';
@@ -83,13 +83,15 @@ function TaskCard({ occ }: { occ: Occurrence }) {
   const doneOccurrence = useStore((s) => s.doneOccurrence);
   const undoOccurrence = useStore((s) => s.undoOccurrence);
   const moveOccurrence = useStore((s) => s.moveOccurrence);
+  const deleteOccurrence = useStore((s) => s.deleteOccurrence);
   const setTab = useStore((s) => s.setTab);
   const state = useStore((s) => s.state);
   const me = useMe();
   const [menu, setMenu] = useState(false);
   const [popping, setPopping] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const meta = ZONE_META[occ.zone];
+  const meta = catInfo(state?.categories, occ.zone);
   const done = occ.status === 'done';
   const partner = state?.members.find((m) => m.role === 'adult' && m.id !== me?.id);
 
@@ -136,6 +138,19 @@ function TaskCard({ occ }: { occ: Occurrence }) {
               🤝 Proposer à {partner.name}
             </button>
           )}
+          <button
+            className="task-menu-danger"
+            onClick={() => {
+              if (!confirmDelete) {
+                setConfirmDelete(true);
+                return;
+              }
+              void deleteOccurrence(occ);
+              setMenu(false);
+            }}
+          >
+            🗑️ {confirmDelete ? 'Confirmer la suppression' : 'Supprimer'}
+          </button>
         </div>
       )}
     </div>

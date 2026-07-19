@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { VillageScene, timeOfDay } from '../components/VillageScene';
 import { Creature } from '../components/Creature';
-import { ZONE_META } from '../zones';
+import { ZONE_META, catInfo } from '../zones';
 import { LEVELS } from '@shared/village';
 import type { Zone } from '../types';
 import './village.css';
@@ -116,7 +116,7 @@ function ZoneSheet({ zone, onClose }: { zone: Zone; onClose: () => void }) {
   const state = useStore((s) => s.state);
   if (!state) return null;
   const meta = ZONE_META[zone];
-  const tasks = state.week.filter((o) => o.zone === zone);
+  const tasks = state.week.filter((o) => catInfo(state.categories, o.zone).sceneZone === zone);
   const byMember = (id: string) => state.members.find((m) => m.id === id);
 
   return (

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { api, getMemberId, setMemberId } from './api';
 import { enqueue, flushQueue, loadCache, saveCache } from './offline';
+import { catInfo } from './zones';
 import type { AppState, Occurrence, ShoppingItem, Zone } from './types';
 
 export type TabId = 'village' | 'jour' | 'semaine' | 'courses' | 'plus';
@@ -34,7 +35,9 @@ interface Store {
   doneOccurrence: (occ: Occurrence, validatedBy?: string) => Promise<void>;
   undoOccurrence: (occ: Occurrence) => Promise<void>;
   moveOccurrence: (occ: Occurrence, changes: { date?: string; assignee?: string }) => Promise<void>;
-  addOccurrence: (data: { title: string; zone: Zone; weight?: number; date?: string; assignee?: string }) => Promise<void>;
+  addOccurrence: (data: { title: string; zone: string; weight?: number; date?: string; assignee?: string }) => Promise<void>;
+  editOccurrence: (occ: Occurrence, changes: { title?: string; zone?: string; weight?: number }) => Promise<void>;
+  deleteOccurrence: (occ: Occurrence) => Promise<void>;
 
   addShoppingItem: (label: string, aisle?: string) => Promise<void>;
   toggleShoppingItem: (item: ShoppingItem) => Promise<void>;
@@ -128,7 +131,7 @@ export const useStore = create<Store>((set, get) => ({
         week: state.week.map((o) => (o.id === occ.id ? { ...o, status: 'done' as const, doneBy: memberId } : o)),
       },
       celebration: {
-        zone: occ.zone,
+        zone: catInfo(state.categories, occ.zone).sceneZone,
         weight: occ.weight,
         title: occ.title,
         levelBefore: state.village.levelInfo.level,
@@ -175,6 +178,29 @@ export const useStore = create<Store>((set, get) => ({
       set({ state: s });
     } catch (e) {
       set({ error: e instanceof Error ? e.message : 'Erreur' });
+    }
+  },
+
+  editOccurrence: async (occ, changes) => {
+    try {
+      const s = await api(`/occurrences/${occ.id}`, { method: 'PUT', body: changes });
+      set({ state: s });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Erreur' });
+    }
+  },
+
+  deleteOccurrence: async (occ) => {
+    const { state } = get();
+    if (state) {
+      set({ state: { ...state, week: state.week.filter((o) => o.id !== occ.id) } });
+    }
+    try {
+      const s = await api(`/occurrences/${occ.id}`, { method: 'DELETE', body: {} });
+      set({ state: s });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Erreur' });
+      void get().refresh();
     }
   },
 

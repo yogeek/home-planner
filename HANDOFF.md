@@ -39,6 +39,7 @@ Onboarding complet, choix de profils, écran Village (scène animée, jauge, bal
 - Push non testé de bout en bout sur un vrai téléphone (l'abonnement et l'envoi sont implémentés ; à valider quand la famille active les notifications).
 - Rappels à heure précise (`reminder_time`) : mentionnés dans les pushes matin/soir, pas de push à l'heure exacte (choix v1).
 - Écran « Régler les tâches » ajouté suite aux retours de Guillaume (19/07 matin) : CRUD complet des task_defs dans l'UI.
+- Catégories personnalisées (19/07, 2e retour) : table `categories` (migration 0003), le champ `zone` des tâches est devenu un id de catégorie, 7 catégories intégrées mappées sur les zones de la scène dont la nouvelle « La clairière » (loisirs). CRUD catégories dans les réglages (custom uniquement pour suppression, tâches réaffectées aux loisirs). CRUD complet des occurrences (PUT/DELETE /occurrences/:id, DELETE /tasks/:id, /categories).
 - Rayon des articles : « autre » par défaut, appris via l'historique d'achats ; pas de sélecteur manuel (v1).
 - QR code du lien famille non généré (pas d'outil dispo) ; le bouton « Inviter » de l'app partage le lien.
 

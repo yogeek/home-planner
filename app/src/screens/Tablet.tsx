@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { VillageScene, timeOfDay } from '../components/VillageScene';
 import { Creature } from '../components/Creature';
-import { ZONE_META } from '../zones';
+import { catInfo } from '../zones';
 import { LEVELS } from '@shared/village';
 import type { Zone } from '../types';
 import './village.css';
@@ -100,7 +100,7 @@ export function Tablet() {
                         disabled={m.role === 'child'}
                         title={t.status === 'done' ? 'Annuler (coché par erreur ?)' : 'Marquer fait'}
                       >
-                        {t.status === 'done' ? '✅' : '⬜'} {ZONE_META[t.zone].emoji} {t.title}
+                        {t.status === 'done' ? '✅' : '⬜'} {catInfo(state.categories, t.zone).emoji} {t.title}
                       </button>
                     </li>
                   ))}

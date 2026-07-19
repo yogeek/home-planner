@@ -86,8 +86,8 @@ const DECOR: { x: number; y: number; emoji: string; size: number }[] = [
   { x: 274, y: 196, emoji: '🌉', size: 12 },
   { x: 96, y: 132, emoji: '🐝', size: 8 },
   { x: 60, y: 108, emoji: '🌬️', size: 12 },
-  { x: 320, y: 120, emoji: '🐻', size: 11 },
-  { x: 348, y: 148, emoji: '🍎', size: 9 },
+  { x: 316, y: 122, emoji: '🐻', size: 11 },
+  { x: 336, y: 176, emoji: '🍎', size: 9 },
   { x: 36, y: 140, emoji: '🛖', size: 11 },
   { x: 190, y: 120, emoji: '✨', size: 9 },
   { x: 254, y: 120, emoji: '🎻', size: 9 },
@@ -291,6 +291,26 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
         </g>
         <text x="133" y="184" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
           L'atelier
+        </text>
+      </ZoneG>
+
+      {/* --- Zone : la clairière (loisirs) --- */}
+      <ZoneG zone="loisirs" freshness={freshness.loisirs ?? 55} celebrate={celebrateZone === 'loisirs'} onTap={onZoneTap} label="La clairière">
+        <ellipse cx="368" cy="146" rx="26" ry="9" fill={night ? '#2f5346' : '#9cc79a'} opacity="0.8" />
+        <path d="M355 146 L368 122 L381 146 Z" fill="#d9714e" />
+        <path d="M363 146 L368 131 L373 146 Z" fill={night ? '#3d2a20' : '#8a4631'} />
+        {(freshness.loisirs ?? 55) > 50 && (
+          <g className="kite">
+            <path d="M389 100 L395 108 L389 116 L383 108 Z" fill="#7fa8c9" />
+            <path d="M389 116 Q386 128 380 136" stroke={night ? '#9fb4ac' : '#5a6b64'} strokeWidth="0.9" fill="none" />
+          </g>
+        )}
+        <g stroke="#8a6a45" strokeWidth="1.2">
+          <line x1="346" y1="132" x2="346" y2="146" />
+        </g>
+        <path d="M346 132 L354 134 L346 137 Z" fill="#e8a548" />
+        <text x="368" y="160" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
+          La clairière
         </text>
       </ZoneG>
 

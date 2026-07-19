@@ -1,8 +1,18 @@
 export const TZ = 'Indian/Reunion';
 export const TZ_OFFSET_HOURS = 4;
 
-export const ZONES = ['jardin', 'piscine', 'lessive', 'cuisine', 'courses', 'rangement'] as const;
-export type Zone = (typeof ZONES)[number];
+/** Zones visibles dans la scène du village (la clairière accueille les loisirs) */
+export const SCENE_ZONES = ['jardin', 'piscine', 'lessive', 'cuisine', 'courses', 'rangement', 'loisirs'] as const;
+export type Zone = (typeof SCENE_ZONES)[number];
+
+/** Catégorie de tâche : les intégrées portent l'id de leur zone ; les personnalisées pointent vers une zone de la scène */
+export interface Category {
+  id: string;
+  label: string;
+  emoji: string;
+  zone: Zone;
+  builtin: boolean;
+}
 
 export const AISLES = [
   'fruits & légumes',
@@ -35,7 +45,8 @@ export interface Member {
 export interface TaskDef {
   id: string;
   title: string;
-  zone: Zone;
+  /** id de catégorie */
+  zone: string;
   weight: number;
   recurrence: Recurrence;
   fixedAssignee?: string | null;
@@ -49,7 +60,7 @@ export interface TaskDef {
 export interface Slot {
   defId: string;
   title: string;
-  zone: Zone;
+  zone: string;
   weight: number;
   date: string; // YYYY-MM-DD
   fixedAssignee?: string | null;
@@ -60,7 +71,8 @@ export interface Occurrence {
   id: string;
   defId: string | null;
   title: string;
-  zone: Zone;
+  /** id de catégorie */
+  zone: string;
   weight: number;
   date: string; // YYYY-MM-DD
   assignee: string;

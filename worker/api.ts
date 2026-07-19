@@ -3,9 +3,10 @@ import { localDate, weekStart, addDays } from '../shared/dates';
 import { freshness, levelFor, updateStreak, weekBalance } from '../shared/village';
 import { suggest, frequentItems } from '../shared/shopping';
 import { DEFAULT_TASK_DEFS } from '../shared/defaults';
-import { ZONES } from '../shared/types';
+import { SCENE_ZONES } from '../shared/types';
 import {
   getAllProgress,
+  getCategories,
   getMembers,
   getOccurrence,
   getOccurrencesBetween,
@@ -47,7 +48,7 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
   const ws = weekStart(today);
   const we = addDays(ws, 6);
 
-  const [members, village, weekOccs, shopping, purchases, progress, taskDefs] = await Promise.all([
+  const [members, village, weekOccs, shopping, purchases, progress, taskDefs, categories] = await Promise.all([
     getMembers(db),
     getVillage(db),
     getOccurrencesBetween(db, ws, we),
@@ -55,6 +56,7 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
     getPurchases(db),
     getAllProgress(db),
     getTaskDefs(db),
+    getCategories(db),
   ]);
 
   const adults = members.filter((m) => m.role === 'adult');
@@ -68,7 +70,7 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
   for (const r of monthRows) monthTotals[r.assignee as string] = { total: r.total as number, count: r.n as number };
 
   const zoneFreshness: Record<string, number> = {};
-  for (const zone of ZONES) zoneFreshness[zone] = freshness(village.zoneLastDone[zone] ?? null, now);
+  for (const zone of SCENE_ZONES) zoneFreshness[zone] = freshness(village.zoneLastDone[zone] ?? null, now);
 
   return {
     now,
@@ -90,6 +92,7 @@ async function buildState(env: Env): Promise<Record<string, unknown>> {
     balance: adults.length >= 2 ? weekBalance(weekOccs, [adults[0].id, adults[1].id]) : null,
     monthTotals,
     taskDefs,
+    categories,
   };
 }
 
@@ -170,6 +173,30 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       return json(await buildState(env));
     }
 
+    // Édition et suppression d'une occurrence
+    const occIdMatch = path.match(/^\/occurrences\/([^/]+)$/);
+    if (occIdMatch && (method === 'PUT' || method === 'DELETE')) {
+      const occ = await getOccurrence(db, occIdMatch[1]);
+      if (!occ) return json({ error: 'Occurrence introuvable' }, 404);
+      if (method === 'DELETE') {
+        // Si la tâche était faite, on retire ses glands avant de la supprimer
+        if (occ.status === 'done') {
+          await db.prepare('UPDATE village SET acorns = MAX(0, acorns - ?) WHERE id = 1').bind(occ.weight).run();
+        }
+        await db.prepare('DELETE FROM occurrences WHERE id = ?').bind(occ.id).run();
+      } else {
+        const body = await readBody(request);
+        const cats = await getCategories(db);
+        const zone = cats.some((c) => c.id === body.zone) ? (body.zone as string) : occ.zone;
+        await db
+          .prepare('UPDATE occurrences SET title = ?, zone = ?, weight = ?, manual = 1 WHERE id = ?')
+          .bind(((body.title as string) ?? occ.title).trim() || occ.title, zone, Number(body.weight) || occ.weight, occ.id)
+          .run();
+      }
+      notify();
+      return json(await buildState(env));
+    }
+
     // /occurrences/:id/(done|undo|move|skip) et POST /occurrences
     const occMatch = path.match(/^\/occurrences\/([^/]+)\/(done|undo|move|skip)$/);
     if (occMatch && method === 'POST') {
@@ -187,7 +214,9 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
           .bind(now, doneBy, (body.validatedBy as string) ?? null, id)
           .run();
         const village = await getVillage(db);
-        village.zoneLastDone[occ.zone] = now;
+        const categories = await getCategories(db);
+        const sceneZone = categories.find((c) => c.id === occ.zone)?.zone ?? 'loisirs';
+        village.zoneLastDone[sceneZone] = now;
         await db
           .prepare('UPDATE village SET acorns = acorns + ?, zone_last_done = ? WHERE id = 1')
           .bind(occ.weight, JSON.stringify(village.zoneLastDone))
@@ -223,7 +252,8 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       const body = await readBody(request);
       const title = (body.title as string)?.trim();
       if (!title) return json({ error: 'Titre requis' }, 400);
-      const zone = ZONES.includes(body.zone as (typeof ZONES)[number]) ? (body.zone as string) : 'rangement';
+      const cats = await getCategories(db);
+      const zone = cats.some((c) => c.id === body.zone) ? (body.zone as string) : 'loisirs';
       const date = (body.date as string) ?? localDate(new Date().toISOString());
       const assignee = (body.assignee as string) ?? (body.byMemberId as string);
       if (!assignee) return json({ error: 'Assigné requis' }, 400);
@@ -304,7 +334,8 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       const body = await readBody(request);
       const title = (body.title as string)?.trim();
       if (!title) return json({ error: 'Titre requis' }, 400);
-      const zone = ZONES.includes(body.zone as (typeof ZONES)[number]) ? (body.zone as string) : 'rangement';
+      const cats = await getCategories(db);
+      const zone = cats.some((c) => c.id === body.zone) ? (body.zone as string) : 'loisirs';
       await db
         .prepare(
           'INSERT INTO task_defs (id, title, zone, weight, recurrence, fixed_assignee, child_task, reminder_time, season) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -321,6 +352,64 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
           (body.season as string) ?? 'all',
         )
         .run();
+      notify();
+      return json(await buildState(env));
+    }
+
+    const taskDelMatch = path.match(/^\/tasks\/([^/]+)$/);
+    if (taskDelMatch && method === 'DELETE') {
+      const def = (await getTaskDefs(db)).find((d) => d.id === taskDelMatch[1]);
+      if (!def) return json({ error: 'Tâche introuvable' }, 404);
+      const today = localDate(new Date().toISOString());
+      await db.batch([
+        // On garde l'historique fait, on retire les occurrences à venir
+        db.prepare("DELETE FROM occurrences WHERE def_id = ? AND status = 'todo' AND date >= ?").bind(def.id, today),
+        db.prepare('UPDATE occurrences SET def_id = NULL WHERE def_id = ?').bind(def.id),
+        db.prepare('DELETE FROM task_defs WHERE id = ?').bind(def.id),
+      ]);
+      notify();
+      return json(await buildState(env));
+    }
+
+    // Catégories personnalisées
+    if (path === '/categories' && method === 'POST') {
+      const body = await readBody(request);
+      const label = (body.label as string)?.trim();
+      if (!label) return json({ error: 'Nom requis' }, 400);
+      const zone = SCENE_ZONES.includes(body.zone as (typeof SCENE_ZONES)[number]) ? (body.zone as string) : 'loisirs';
+      await db
+        .prepare('INSERT INTO categories (id, label, emoji, zone, builtin) VALUES (?, ?, ?, ?, 0)')
+        .bind(crypto.randomUUID(), label, ((body.emoji as string) || '⭐').trim().slice(0, 8), zone)
+        .run();
+      notify();
+      return json(await buildState(env));
+    }
+
+    const catMatch = path.match(/^\/categories\/([^/]+)$/);
+    if (catMatch && (method === 'PUT' || method === 'DELETE')) {
+      const cat = (await getCategories(db)).find((c) => c.id === catMatch[1]);
+      if (!cat) return json({ error: 'Catégorie introuvable' }, 404);
+      if (method === 'DELETE') {
+        if (cat.builtin) return json({ error: 'Les catégories du village ne peuvent pas être supprimées' }, 400);
+        await db.batch([
+          // Les tâches de la catégorie supprimée retournent aux loisirs
+          db.prepare("UPDATE task_defs SET zone = 'loisirs' WHERE zone = ?").bind(cat.id),
+          db.prepare("UPDATE occurrences SET zone = 'loisirs' WHERE zone = ?").bind(cat.id),
+          db.prepare('DELETE FROM categories WHERE id = ?').bind(cat.id),
+        ]);
+      } else {
+        const body = await readBody(request);
+        const zone = SCENE_ZONES.includes(body.zone as (typeof SCENE_ZONES)[number]) ? (body.zone as string) : cat.zone;
+        await db
+          .prepare('UPDATE categories SET label = ?, emoji = ?, zone = ? WHERE id = ?')
+          .bind(
+            ((body.label as string) ?? cat.label).trim() || cat.label,
+            ((body.emoji as string) || cat.emoji).trim().slice(0, 8),
+            cat.builtin ? cat.zone : zone,
+            cat.id,
+          )
+          .run();
+      }
       notify();
       return json(await buildState(env));
     }

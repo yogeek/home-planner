@@ -125,6 +125,11 @@
   background: var(--parchemin-2);
 }
 
+.task-menu-danger {
+  color: var(--danger);
+  font-weight: 700;
+}
+
 .today-subtitle {
   color: var(--parchemin);
   margin: 20px 2px 10px;

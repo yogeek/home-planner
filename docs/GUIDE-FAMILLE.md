@@ -25,7 +25,9 @@ C'est tout. Le village est né, la semaine est déjà organisée et répartie é
 - **Semaine** : la répartition de la semaine, proposée automatiquement chaque dimanche soir (équilibrée par pénibilité, avec rotation des corvées). Tape une tâche pour changer de jour ou de personne, « + » pour en ajouter une, « ⚖️ Rééquilibrer » pour redistribuer.
 - **Courses** : la liste partagée en direct. Ajoutez au fil de la semaine ; celui qui est au magasin coche (ça marche même sans réseau). « Terminer les courses » apprend vos habitudes : l'app suggérera bientôt le lait toute seule 💡.
 - **Mode enfant** (bouton dans « Plus », ou son profil) : ses missions en images, plein écran. Quand il a fini, il tape sa mission et un parent valide : danse et confettis garantis, et ses glands comptent pour le village.
-- **Plus** : l'équilibre détaillé de la semaine et du mois, ta série de jours actifs, le journal du village, l'activation des rappels, et « 🛠️ Régler les tâches du foyer » pour adapter les tâches récurrentes à votre vraie maison (nom, zone, pénibilité, fréquence ou jours fixes, en rotation ou toujours la même personne, mission enfant, saison, pause).
+- **Plus** : l'équilibre détaillé de la semaine et du mois, ta série de jours actifs, le journal du village, l'activation des rappels, et « 🛠️ Régler les tâches du foyer » pour adapter les tâches récurrentes à votre vraie maison (nom, catégorie, pénibilité, fréquence ou jours fixes, en rotation ou toujours la même personne, mission enfant, saison, pause, suppression).
+- **Catégories personnalisées** : dans les réglages, créez vos propres catégories (sport 🏃, sorties 🎉, administratif 📄...) en plus de celles du village. Elles vivent dans la zone de votre choix, par défaut « La clairière » 🎈, le coin loisirs du village. Comme ça, même le footing fait gagner des glands.
+- **Sur chaque tâche de la semaine** : touchez-la pour changer la personne, le jour, la modifier (nom, catégorie, pénibilité) ou la supprimer.
 - **Oups, coché par erreur ?** Retouche la coche (Aujourd'hui ou tableau) ou touche la tâche barrée dans Semaine → « ↩️ Remettre à faire ».
 
 ## Les rappels doux

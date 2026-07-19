@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useStore } from '../store';
 import { api } from '../api';
-import { ZONE_META } from '../zones';
-import { ZONES } from '@shared/types';
-import type { AppState, TaskDef, Zone } from '../types';
+import { ZONE_META, catInfo } from '../zones';
+import { SCENE_ZONES } from '@shared/types';
+import type { AppState, Category, TaskDef } from '../types';
 import './tasksettings.css';
 
 const DAY_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -17,10 +17,11 @@ function recurrenceLabel(def: TaskDef): string {
   return '1×/mois';
 }
 
-/** Réglages des tâches récurrentes du foyer */
+/** Réglages des tâches récurrentes et des catégories du foyer */
 export function TaskSettings({ onClose }: { onClose: () => void }) {
   const state = useStore((s) => s.state);
   const [editing, setEditing] = useState<TaskDef | 'new' | null>(null);
+  const [editingCat, setEditingCat] = useState<Category | 'new' | null>(null);
   if (!state) return null;
 
   const defs = [...state.taskDefs].sort(
@@ -43,11 +44,11 @@ export function TaskSettings({ onClose }: { onClose: () => void }) {
         <div className="tset-list">
           {defs.map((d) => (
             <button key={d.id} className={`tset-item ${d.active ? '' : 'inactive'}`} onClick={() => setEditing(d)}>
-              <span className="tset-zone" aria-hidden>{ZONE_META[d.zone].emoji}</span>
+              <span className="tset-zone" aria-hidden>{catInfo(state.categories, d.zone).emoji}</span>
               <span className="tset-body">
                 <span className="tset-title">{d.title}</span>
                 <span className="tset-meta">
-                  {recurrenceLabel(d)} · {'🌰'.repeat(d.weight)}
+                  {catInfo(state.categories, d.zone).label} · {recurrenceLabel(d)} · {'🌰'.repeat(d.weight)}
                   {d.childTask ? ' · enfant 🧸' : ''}
                   {d.season !== 'all' ? (d.season === 'summer' ? ' · été' : ' · hiver') : ''}
                   {!d.active ? ' · en pause' : ''}
@@ -60,8 +61,35 @@ export function TaskSettings({ onClose }: { onClose: () => void }) {
         <button className="btn tset-add" onClick={() => setEditing('new')}>
           + Nouvelle tâche récurrente
         </button>
+
+        <header className="tset-head tset-cats-head">
+          <h2>🏷️ Les catégories</h2>
+        </header>
+        <p className="muted tset-hint">
+          Chaque catégorie vit dans une zone du village. Crée les tiennes (sport, sorties, admin...) : par défaut elles
+          s'installent à la clairière 🎈.
+        </p>
+        <div className="tset-list">
+          {state.categories.map((c) => (
+            <button key={c.id} className="tset-item" onClick={() => setEditingCat(c)}>
+              <span className="tset-zone" aria-hidden>{c.emoji}</span>
+              <span className="tset-body">
+                <span className="tset-title">{c.label}</span>
+                <span className="tset-meta">
+                  {ZONE_META[c.zone].place}
+                  {c.builtin ? ' · catégorie du village' : ''}
+                </span>
+              </span>
+              <span aria-hidden>›</span>
+            </button>
+          ))}
+        </div>
+        <button className="btn tset-add" onClick={() => setEditingCat('new')}>
+          + Nouvelle catégorie
+        </button>
       </div>
       {editing && <EditSheet def={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
+      {editingCat && <CategorySheet cat={editingCat === 'new' ? null : editingCat} onClose={() => setEditingCat(null)} />}
     </div>
   );
 }
@@ -70,7 +98,7 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
   const state = useStore((s) => s.state);
   const applyState = useStore((s) => s.applyState);
   const [title, setTitle] = useState(def?.title ?? '');
-  const [zone, setZone] = useState<Zone>(def?.zone ?? 'rangement');
+  const [zone, setZone] = useState(def?.zone ?? 'rangement');
   const [weight, setWeight] = useState(def?.weight ?? 2);
   const [mode, setMode] = useState<'freq' | 'days'>(def?.recurrence.daysOfWeek?.length ? 'days' : 'freq');
   const [freq, setFreq] = useState(def?.recurrence.timesPerWeek ?? 1);
@@ -80,6 +108,7 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
   const [season, setSeason] = useState(def?.season ?? 'all');
   const [active, setActive] = useState(def?.active ?? true);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!state) return null;
   const adults = state.members.filter((m) => m.role === 'adult');
@@ -106,6 +135,18 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
     }
   }
 
+  async function remove() {
+    if (!def || busy) return;
+    setBusy(true);
+    try {
+      const s = await api<AppState>(`/tasks/${def.id}`, { method: 'DELETE', body: {} });
+      applyState(s);
+      onClose();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet tset-sheet" onClick={(e) => e.stopPropagation()}>
@@ -114,11 +155,11 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
 
         <input className="ob-input" placeholder="Nom de la tâche" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-        <p className="muted">Zone :</p>
+        <p className="muted">Catégorie :</p>
         <div className="move-row wrap">
-          {ZONES.map((z) => (
-            <button key={z} className={`move-chip ${zone === z ? 'active' : ''}`} onClick={() => setZone(z)}>
-              {ZONE_META[z].emoji} {ZONE_META[z].label}
+          {state.categories.map((c) => (
+            <button key={c.id} className={`move-chip ${zone === c.id ? 'active' : ''}`} onClick={() => setZone(c.id)}>
+              {c.emoji} {c.label}
             </button>
           ))}
         </div>
@@ -209,6 +250,108 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
         <button className="btn sheet-close" disabled={!title.trim() || busy} onClick={() => void save()}>
           {busy ? '...' : def ? 'Enregistrer' : 'Créer la tâche'}
         </button>
+        {def && (
+          <button
+            className="btn ghost sheet-close tset-delete"
+            disabled={busy}
+            onClick={() => (confirmDelete ? void remove() : setConfirmDelete(true))}
+          >
+            🗑️ {confirmDelete ? 'Confirmer : supprimer définitivement' : 'Supprimer cette tâche'}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CategorySheet({ cat, onClose }: { cat: Category | null; onClose: () => void }) {
+  const state = useStore((s) => s.state);
+  const applyState = useStore((s) => s.applyState);
+  const [label, setLabel] = useState(cat?.label ?? '');
+  const [emoji, setEmoji] = useState(cat?.emoji ?? '');
+  const [zone, setZone] = useState(cat?.zone ?? 'loisirs');
+  const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  if (!state) return null;
+
+  const suggestions = ['🏃', '🎉', '🎨', '📄', '🐶', '🚗', '🎮', '📚', '🛠️', '💆'];
+
+  async function save() {
+    if (!label.trim() || busy) return;
+    setBusy(true);
+    const body = { label: label.trim(), emoji: emoji.trim() || '⭐', zone };
+    try {
+      const s = cat
+        ? await api<AppState>(`/categories/${cat.id}`, { method: 'PUT', body })
+        : await api<AppState>('/categories', { body });
+      applyState(s);
+      onClose();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    if (!cat || busy) return;
+    setBusy(true);
+    try {
+      const s = await api<AppState>(`/categories/${cat.id}`, { method: 'DELETE', body: {} });
+      applyState(s);
+      onClose();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet tset-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+        <h3>{cat ? `Catégorie ${cat.label}` : 'Nouvelle catégorie'}</h3>
+
+        <input
+          className="ob-input"
+          placeholder="Nom (ex : Sport, Sorties, Administratif...)"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+        />
+
+        <p className="muted">Emoji :</p>
+        <div className="move-row wrap">
+          <input className="ob-input tset-emoji" placeholder="⭐" value={emoji} onChange={(e) => setEmoji(e.target.value)} />
+          {suggestions.map((s) => (
+            <button key={s} className={`move-chip ${emoji === s ? 'active' : ''}`} onClick={() => setEmoji(s)}>
+              {s}
+            </button>
+          ))}
+        </div>
+
+        {!cat?.builtin && (
+          <>
+            <p className="muted">Où vit cette catégorie dans le village ?</p>
+            <div className="move-row wrap">
+              {SCENE_ZONES.map((z) => (
+                <button key={z} className={`move-chip ${zone === z ? 'active' : ''}`} onClick={() => setZone(z)}>
+                  {ZONE_META[z].emoji} {ZONE_META[z].place}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        <button className="btn sheet-close" disabled={!label.trim() || busy} onClick={() => void save()}>
+          {busy ? '...' : cat ? 'Enregistrer' : 'Créer la catégorie'}
+        </button>
+        {cat && !cat.builtin && (
+          <button
+            className="btn ghost sheet-close tset-delete"
+            disabled={busy}
+            onClick={() => (confirmDelete ? void remove() : setConfirmDelete(true))}
+          >
+            🗑️ {confirmDelete ? 'Confirmer (les tâches iront aux loisirs)' : 'Supprimer cette catégorie'}
+          </button>
+        )}
       </div>
     </div>
   );

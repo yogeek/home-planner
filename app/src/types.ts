@@ -1,4 +1,5 @@
 import type {
+  Category,
   Member,
   MemberProgress,
   Occurrence,
@@ -8,7 +9,7 @@ import type {
 } from '@shared/types';
 import type { LevelInfo, Balance } from '@shared/village';
 
-export type { Member, MemberProgress, Occurrence, ShoppingItem, TaskDef, Zone };
+export type { Category, Member, MemberProgress, Occurrence, ShoppingItem, TaskDef, Zone };
 export type { LevelInfo, Balance };
 
 export interface AppState {
@@ -31,4 +32,5 @@ export interface AppState {
   balance: Balance | null;
   monthTotals: Record<string, { total: number; count: number }>;
   taskDefs: TaskDef[];
+  categories: Category[];
 }
