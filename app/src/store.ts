@@ -23,6 +23,9 @@ interface Store {
   /** Mode tableau du foyer (tablette murale), mémorisé sur l'appareil */
   dashboard: boolean;
   setDashboard: (v: boolean) => void;
+  /** Vue confortable : textes plus gros, mémorisé sur l'appareil */
+  comfort: boolean;
+  setComfort: (v: boolean) => void;
   loading: boolean;
   error: string | null;
   celebration: Celebration | null;
@@ -97,6 +100,13 @@ export const useStore = create<Store>((set, get) => ({
   setDashboard: (v) => {
     localStorage.setItem('village.dashboard', v ? '1' : '0');
     set({ dashboard: v });
+  },
+
+  comfort: localStorage.getItem('village.comfort') === '1',
+  setComfort: (v) => {
+    localStorage.setItem('village.comfort', v ? '1' : '0');
+    document.documentElement.classList.toggle('comfort', v);
+    set({ comfort: v });
   },
 
   setTab: (tab) => set({ tab }),

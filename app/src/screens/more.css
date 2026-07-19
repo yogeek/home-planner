@@ -74,6 +74,21 @@
   margin-top: 8px;
 }
 
+.comfort-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: var(--encre);
+}
+
+.comfort-toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--miel);
+}
+
 .more-actions {
   display: flex;
   flex-direction: column;

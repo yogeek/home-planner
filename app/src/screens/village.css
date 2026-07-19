@@ -130,8 +130,45 @@
 .gauge-head {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.gauge-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gauge-help {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--parchemin-2);
+  color: var(--encre-douce);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gauge-help:hover {
+  background: var(--miel);
+  color: var(--encre);
+}
+
+.gameinfo-list {
+  margin: 10px 0 14px;
+  padding-left: 20px;
+}
+
+.gameinfo-list li {
+  margin: 8px 0;
+  line-height: 1.45;
+  color: var(--encre);
 }
 
 .gauge-level {

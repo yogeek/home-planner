@@ -3,6 +3,7 @@ import { useStore } from '../store';
 import { VillageScene, timeOfDay } from '../components/VillageScene';
 import { Creature } from '../components/Creature';
 import { Harvest } from '../components/Harvest';
+import { GameInfo } from '../components/GameInfo';
 import { ZONE_META, catInfo } from '../zones';
 import { LEVELS } from '@shared/village';
 import type { Zone } from '../types';
@@ -15,6 +16,15 @@ export function Village() {
   const [sheetZone, setSheetZone] = useState<Zone | null>(null);
   const [celebrateZone, setCelebrateZone] = useState<Zone | null>(null);
   const [showAcorn, setShowAcorn] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+
+  // Explication du jeu au tout premier passage sur le village
+  useEffect(() => {
+    if (!localStorage.getItem('village.seenIntro')) {
+      localStorage.setItem('village.seenIntro', '1');
+      setInfoOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!celebration) return;
@@ -52,9 +62,14 @@ export function Village() {
       <div className="card gauge-card">
         <div className="gauge-head">
           <span className="gauge-level display">Village niveau {info.level}</span>
-          <span className="gauge-acorns display" aria-label={`${village.acorns} glands`}>
-            🌰 {village.acorns}
-          </span>
+          <div className="gauge-head-right">
+            <span className="gauge-acorns display" aria-label={`${village.acorns} glands`}>
+              🌰 {village.acorns}
+            </span>
+            <button className="gauge-help" onClick={() => setInfoOpen(true)} aria-label="Comment ça marche ?">
+              ?
+            </button>
+          </div>
         </div>
         <div
           className="gauge-bar"
@@ -67,14 +82,10 @@ export function Village() {
         </div>
         {nextUnlock ? (
           <p className="gauge-next">
-            Prochain déblocage :{' '}
+            Encore <strong>{nextUnlock.cost - info.intoLevel} glands</strong> ensemble pour débloquer{' '}
             <strong>
               {nextUnlock.unlock} {nextUnlock.emoji}
             </strong>
-            <span className="muted">
-              {' '}
-              ({info.intoLevel}/{nextUnlock.cost} 🌰)
-            </span>
           </p>
         ) : (
           <p className="gauge-next">Le village est à son apogée ! 🎆</p>
@@ -87,6 +98,7 @@ export function Village() {
       </div>
 
       {sheetZone && <ZoneSheet zone={sheetZone} onClose={() => setSheetZone(null)} />}
+      {infoOpen && <GameInfo onClose={() => setInfoOpen(false)} />}
     </div>
   );
 }

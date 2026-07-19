@@ -31,6 +31,15 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+html {
+  font-size: 16px;
+}
+
+/* Vue confortable : agrandit tous les textes (relatifs au rem) d'environ 15 % */
+html.comfort {
+  font-size: 18.5px;
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;

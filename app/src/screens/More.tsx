@@ -15,6 +15,8 @@ export function More() {
   const me = useMe();
   const setChildMode = useStore((s) => s.setChildMode);
   const setDashboard = useStore((s) => s.setDashboard);
+  const comfort = useStore((s) => s.comfort);
+  const setComfort = useStore((s) => s.setComfort);
   const chooseMember = useStore((s) => s.chooseMember);
   const [pushStatus, setPushStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -131,6 +133,16 @@ export function More() {
             );
           })}
         </ul>
+      </div>
+
+      {/* Confort de lecture */}
+      <div className="card more-card">
+        <h3>🔎 Confort de lecture</h3>
+        <p className="muted">Agrandit les textes de toute l'application, pour lire plus facilement.</p>
+        <label className="comfort-toggle">
+          <input type="checkbox" checked={comfort} onChange={(e) => setComfort(e.target.checked)} />
+          Vue confortable (gros texte)
+        </label>
       </div>
 
       {/* Notifications */}
