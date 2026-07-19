@@ -165,7 +165,7 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       }
       stmts.push(db.prepare("INSERT INTO village (id, acorns, zone_last_done) VALUES (1, 0, '{}')"));
       await db.batch(stmts);
-      await generateWeek(env, weekStart(localDate(now)));
+      await generateWeek(env, weekStart(localDate(now)), localDate(now));
       notify();
       return json(await buildState(env));
     }
@@ -293,8 +293,9 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
 
     if (path === '/week/regenerate' && method === 'POST') {
       const body = await readBody(request);
-      const ws = (body.weekStart as string) ?? weekStart(localDate(new Date().toISOString()));
-      await generateWeek(env, ws);
+      const today = localDate(new Date().toISOString());
+      const ws = (body.weekStart as string) ?? weekStart(today);
+      await generateWeek(env, ws, today);
       notify();
       return json(await buildState(env));
     }

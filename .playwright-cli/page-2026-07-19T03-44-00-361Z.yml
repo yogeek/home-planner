@@ -1,0 +1,60 @@
+- generic [ref=e202]:
+  - generic [ref=e203]:
+    - img "Le village de la famille" [ref=e205]:
+      - generic [ref=e211]:
+        - img "renard" [ref=e217]
+        - generic [ref=e233]: Guillaume
+      - generic [ref=e234]:
+        - img "chouette" [ref=e240]
+        - generic [ref=e256]: Chérie
+      - generic [ref=e257]:
+        - img "panda roux" [ref=e263]
+        - generic [ref=e281]: Petit Lion
+      - button "Le potager" [ref=e282] [cursor=pointer]:
+        - generic [ref=e297]: Le potager
+      - button "La source" [ref=e298] [cursor=pointer]:
+        - generic [ref=e306]: La source
+      - button "Le lavoir" [ref=e307] [cursor=pointer]:
+        - generic [ref=e319]: Le lavoir
+      - button "La grande table" [ref=e320] [cursor=pointer]:
+        - generic [ref=e329]: La grande table
+      - button "Le marché" [ref=e330] [cursor=pointer]:
+        - generic [ref=e340]: Le marché
+      - button "L'atelier" [ref=e341] [cursor=pointer]:
+        - generic [ref=e349]: L'atelier
+    - generic [ref=e350]:
+      - generic [ref=e351]:
+        - generic [ref=e352]: Village niveau 0
+        - generic "0 glands" [ref=e353]: 🌰 0
+      - progressbar [ref=e354]
+      - paragraph [ref=e356]:
+        - text: "Prochain déblocage :"
+        - strong [ref=e357]: Le puits fleuri 🌼
+        - generic [ref=e358]: (0/75 🌰)
+    - generic [ref=e359]:
+      - paragraph [ref=e360]: L'équilibre de la semaine
+      - generic [ref=e362]:
+        - generic [ref=e363]:
+          - img "renard" [ref=e364]
+          - generic [ref=e380]: 0 🌰
+        - generic [ref=e381]:
+          - img "chouette" [ref=e382]
+          - generic [ref=e398]: 0 🌰
+      - paragraph [ref=e400]: Bel équilibre, continuez comme ça !
+  - navigation "Navigation principale" [ref=e401]:
+    - button "Village" [ref=e402] [cursor=pointer]:
+      - generic [ref=e403]: 🏡
+      - text: Village
+    - button "Aujourd'hui 1" [ref=e404] [cursor=pointer]:
+      - generic [ref=e405]: ☀️
+      - text: Aujourd'hui
+      - generic [ref=e406]: "1"
+    - button "Semaine" [ref=e407] [cursor=pointer]:
+      - generic [ref=e408]: 🗓️
+      - text: Semaine
+    - button "Courses" [ref=e409] [cursor=pointer]:
+      - generic [ref=e410]: 🧺
+      - text: Courses
+    - button "Plus" [ref=e411] [cursor=pointer]:
+      - generic [ref=e412]: 🌙
+      - text: Plus

@@ -4,7 +4,9 @@ Application familiale ludique de gestion des tâches ménagères. Votre foyer de
 
 **Production** : https://le-village.boka-reunion.workers.dev
 
-## Fonctionnalités (cible v1)
+**Statut** : v1 déployée et testée E2E (mobile, tablette, temps réel, hors ligne). Guide d'utilisation : `docs/GUIDE-FAMILLE.md`.
+
+## Fonctionnalités (v1)
 
 - Village SVG animé qui reflète l'état réel de la maison (fraîcheur par zone)
 - Distribution automatique et équilibrée des tâches chaque semaine, ajustable
@@ -30,4 +32,4 @@ npm run dev           # serveur local (API + app)
 npm run deploy        # déploiement Cloudflare
 ```
 
-Docs : spec dans `docs/superpowers/specs/`, plan dans `docs/superpowers/plans/`, état de session dans `HANDOFF.md`, guide famille dans `docs/GUIDE-FAMILLE.md` (à venir).
+Docs : spec dans `docs/superpowers/specs/`, plan dans `docs/superpowers/plans/`, état de session dans `HANDOFF.md`, guide famille dans `docs/GUIDE-FAMILLE.md`. CI/CD : `.github/workflows/deploy.yml` (déploiement auto si le secret `CLOUDFLARE_API_TOKEN` est configuré sur le repo).

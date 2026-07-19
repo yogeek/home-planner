@@ -1,0 +1,13 @@
+- generic [ref=e142]:
+  - heading "Qui es-tu ?" [level=1] [ref=e143]
+  - generic [ref=e144]:
+    - button "renard Guillaume" [ref=e145] [cursor=pointer]:
+      - img "renard" [ref=e146]
+      - generic [ref=e162]: Guillaume
+    - button "chouette Chérie" [ref=e163] [cursor=pointer]:
+      - img "chouette" [ref=e164]
+      - generic [ref=e180]: Chérie
+    - button "panda roux Petit Lion petit habitant" [ref=e181] [cursor=pointer]:
+      - img "panda roux" [ref=e182]
+      - generic [ref=e200]: Petit Lion
+      - generic [ref=e201]: petit habitant

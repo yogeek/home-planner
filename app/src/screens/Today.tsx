@@ -29,7 +29,11 @@ export function Today() {
     <div className="screen today-screen">
       <div className="title-row">
         <h2>
-          {remaining === 0 ? 'Tout est fait, bravo !' : `${remaining} mission${remaining > 1 ? 's' : ''} pour toi`}
+          {mine.length === 0
+            ? 'Journée libre !'
+            : remaining === 0
+              ? 'Tout est fait, bravo !'
+              : `${remaining} mission${remaining > 1 ? 's' : ''} pour toi`}
         </h2>
         <span className="today-date">{dateFmt}</span>
       </div>

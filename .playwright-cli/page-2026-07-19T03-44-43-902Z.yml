@@ -1,0 +1,18 @@
+- generic [ref=e706]:
+  - button "Quitter le mode enfant" [ref=e707] [cursor=pointer]: 🚪
+  - generic [ref=e708]:
+    - img "panda roux" [ref=e709]
+    - heading "Tes missions, Petit Lion" [level=1] [ref=e727]
+  - button "Ranger mes jouets" [active] [ref=e729] [cursor=pointer]:
+    - generic [ref=e730]: 🧸
+    - generic [ref=e731]: Ranger mes jouets
+  - generic [ref=e733]:
+    - heading "C'est fait ? 🌟" [level=3] [ref=e734]
+    - paragraph [ref=e735]: "Un grand doit valider ta mission :"
+    - generic [ref=e736]:
+      - button "renard Guillaume" [ref=e737] [cursor=pointer]:
+        - img "renard" [ref=e738]
+        - generic [ref=e754]: Guillaume
+      - button "chouette Chérie" [ref=e755] [cursor=pointer]:
+        - img "chouette" [ref=e756]
+        - generic [ref=e772]: Chérie

@@ -67,8 +67,9 @@ export function More() {
         <div className="card more-card">
           <h3>⚖️ L'équilibre en détail</h3>
           <p className="muted">
-            Cette semaine, vous avez accompli <strong>{state.week.filter((o) => o.status === 'done').length}</strong>{' '}
-            missions ensemble.
+            Cette semaine, vous avez accompli{' '}
+            <strong>{state.week.filter((o) => o.status === 'done').length}</strong> mission
+            {state.week.filter((o) => o.status === 'done').length > 1 ? 's' : ''} ensemble.
           </p>
           <div className="bal-duo">
             {adults.map((a) => {
@@ -120,7 +121,7 @@ export function More() {
         {weekDone.length === 0 && <p className="muted">Rien encore cette semaine. La première mission lance l'histoire !</p>}
         <ul className="journal">
           {weekDone.slice(0, 12).map((o) => {
-            const who = state.members.find((m) => m.id === (o.doneBy ?? o.assignee));
+            const who = state.members.find((m) => m.id === o.assignee);
             return (
               <li key={o.id}>
                 {who && <Creature species={who.creature} size={22} />}

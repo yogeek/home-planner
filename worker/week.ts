@@ -6,8 +6,9 @@ import { getMembers, getTaskDefs, getOccurrencesBetween } from './db';
 /**
  * Génère (ou régénère) les occurrences d'une semaine à partir des définitions.
  * Les occurrences déjà faites, sans définition (ponctuelles) ou déplacées manuellement sont conservées.
+ * `fromDate` : les créneaux antérieurs à cette date sont ignorés (pas de tâches dans le passé).
  */
-export async function generateWeek(env: Env, weekStart: string): Promise<void> {
+export async function generateWeek(env: Env, weekStart: string, fromDate?: string): Promise<void> {
   const db = env.DB;
   const members = await getMembers(db);
   const adults = members.filter((m) => m.role === 'adult');
@@ -29,7 +30,7 @@ export async function generateWeek(env: Env, weekStart: string): Promise<void> {
   const keptDefDates = new Set(keep.filter((o) => o.defId).map((o) => `${o.defId}|${o.date}`));
 
   const slots = expandWeek(defs, weekStart, seasonOf(weekStart)).filter(
-    (s) => !keptDefDates.has(`${s.defId}|${s.date}`),
+    (s) => !keptDefDates.has(`${s.defId}|${s.date}`) && (!fromDate || s.date >= fromDate),
   );
   const occurrences = distributeWeek(slots, [adults[0].id, adults[1].id], child?.id ?? null, lastAssignee);
 

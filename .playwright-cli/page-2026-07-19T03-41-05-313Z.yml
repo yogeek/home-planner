@@ -1,0 +1,6 @@
+- generic [ref=e1423]:
+  - button "Quitter le mode enfant" [ref=e1424] [cursor=pointer]: 🚪
+  - generic [ref=e1425]:
+    - img "panda roux" [ref=e1426]
+    - heading "Tes missions, Petit Lion" [level=1] [ref=e1444]
+  - paragraph [ref=e1445]: Pas de mission aujourd'hui. Va jouer ! 🦋

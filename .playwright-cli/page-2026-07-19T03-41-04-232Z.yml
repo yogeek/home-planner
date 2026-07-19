@@ -1,0 +1,53 @@
+- generic [ref=e64]:
+  - generic [ref=e1340]:
+    - heading "Le coin du soir" [level=2] [ref=e1342]
+    - generic [ref=e1343]:
+      - heading "⚖️ L'équilibre en détail" [level=3] [ref=e1344]
+      - paragraph [ref=e1345]:
+        - text: Cette semaine, vous avez accompli
+        - strong [ref=e1346]: "1"
+        - text: missions ensemble.
+      - generic [ref=e1347]:
+        - generic [ref=e1348]:
+          - img "renard" [ref=e1349]
+          - generic [ref=e1367]: 0 🌰
+        - generic [ref=e1368]:
+          - img "chouette" [ref=e1369]
+          - generic [ref=e1387]: 3 🌰
+      - paragraph [ref=e1388]: "Sur les 4 dernières semaines : Guillaume 0 🌰 · Chérie 3 🌰"
+    - generic [ref=e1389]:
+      - heading "🔥 Ta série" [level=3] [ref=e1390]
+      - paragraph [ref=e1391]: "Fais une mission aujourd'hui pour lancer ta série ! Record : 0."
+    - generic [ref=e1392]:
+      - heading "📜 Le journal du village" [level=3] [ref=e1393]
+      - list [ref=e1394]:
+        - listitem [ref=e1395]:
+          - img "renard" [ref=e1396]
+          - generic [ref=e1412]:
+            - strong [ref=e1413]: Guillaume
+            - text: · Préparer les repas 🍲
+    - generic [ref=e1414]:
+      - heading "🔔 Rappels doux" [level=3] [ref=e1415]
+      - paragraph [ref=e1416]: Un résumé le matin, un rappel le soir seulement si besoin.
+      - button "Activer sur cet appareil" [ref=e1417] [cursor=pointer]
+    - generic [ref=e1418]:
+      - button "🧸 Mode Petit Lion" [ref=e1419] [cursor=pointer]
+      - button "💌 Inviter sur cet appareil-là" [ref=e1420] [cursor=pointer]
+      - button "👤 Changer de profil" [ref=e1421] [cursor=pointer]
+    - paragraph [ref=e1422]: Le Village · fait avec 🌰 pour la famille
+  - navigation "Navigation principale" [ref=e263]:
+    - button "Village" [ref=e264] [cursor=pointer]:
+      - generic [ref=e265]: 🏡
+      - text: Village
+    - button "Aujourd'hui" [ref=e266] [cursor=pointer]:
+      - generic [ref=e267]: ☀️
+      - text: Aujourd'hui
+    - button "Semaine" [ref=e268] [cursor=pointer]:
+      - generic [ref=e269]: 🗓️
+      - text: Semaine
+    - button "Courses" [ref=e1333] [cursor=pointer]:
+      - generic [ref=e271]: 🧺
+      - text: Courses
+    - button "Plus" [active] [ref=e272] [cursor=pointer]:
+      - generic [ref=e273]: 🌙
+      - text: Plus

@@ -102,7 +102,7 @@ export function Village() {
           <p className="muted seesaw-hint">
             {Math.abs(tilt) < 4
               ? 'Bel équilibre, continuez comme ça !'
-              : `${tilt > 0 ? adults[0].name : adults[1].name} porte plus cette semaine. Un petit coup de main ?`}
+              : `${balance.ratio > 0.5 ? adults[0].name : adults[1].name} porte plus cette semaine. Un petit coup de main ?`}
           </p>
         </div>
       )}

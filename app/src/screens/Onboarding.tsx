@@ -30,7 +30,17 @@ export function Onboarding() {
   const update = (i: number, patch: Partial<Draft>) =>
     setDrafts((d) => d.map((m, j) => (j === i ? { ...m, ...patch } : m)));
 
-  const taken = (species: string) => members.some((m, i) => i !== step - 1 && m.creature === species);
+  // Une créature n'est bloquée que si un habitant déjà validé (étape précédente) l'a prise
+  const taken = (species: string) => members.some((m, i) => i < step - 1 && m.creature === species);
+
+  function goTo(nextStep: number) {
+    const draft = members[nextStep - 1];
+    if (draft && members.some((m, i) => i < nextStep - 1 && m.creature === draft.creature)) {
+      const free = SPECIES.find((sp) => !members.some((m, i) => i < nextStep - 1 && m.creature === sp));
+      if (free) update(nextStep - 1, { creature: free });
+    }
+    setStep(nextStep);
+  }
 
   async function found() {
     setBusy(true);
@@ -100,7 +110,7 @@ export function Onboarding() {
               Retour
             </button>
             {step < members.length ? (
-              <button className="btn" disabled={!current.name.trim()} onClick={() => setStep(step + 1)}>
+              <button className="btn" disabled={!current.name.trim()} onClick={() => goTo(step + 1)}>
                 Suivant
               </button>
             ) : (

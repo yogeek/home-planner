@@ -1,40 +1,47 @@
-# HANDOFF : état d'avancement de la session
+# HANDOFF : état de la session
 
-> Fichier de reprise : si la session est interrompue, lire ce fichier, puis `docs/superpowers/plans/2026-07-18-le-village.md` (le plan, source de vérité des tâches) et `docs/superpowers/specs/2026-07-18-le-village-design.md` (la spec validée par Guillaume).
+> Reprise : lire ce fichier, puis `docs/superpowers/plans/2026-07-18-le-village.md` et `docs/superpowers/specs/2026-07-18-le-village-design.md`.
 
-## Mission
+## Statut : ✅ TERMINÉ ET DÉPLOYÉ
 
-Développer en autonomie « Le Village », PWA familiale gamifiée de gestion des tâches ménagères (couple + fils 3-5 ans), jusqu'à un état utilisable par la famille. Guillaume dort, il a validé la spec et donné carte blanche. Priorités : simplicité d'usage, aspect ludique, visuel parfait.
+Les 14 tâches du plan sont faites. L'application est en production, testée E2E, prête pour la famille.
 
-## Infos clés
+- **URL prod** : https://le-village.boka-reunion.workers.dev
+- **Lien famille (secret)** : voir `docs/GUIDE-FAMILLE.md` (jeton `FAMILY_TOKEN` en secret Cloudflare)
+- La base prod est vierge : la famille fera son onboarding elle-même (écran « Fonder notre village »).
 
-- Déploiement : Cloudflare compte boka.reunion@gmail.com (wrangler déjà loggé), Worker `le-village`, URL prod : https://le-village.boka-reunion.workers.dev
-- D1 : `village-db`, id `264d7adb-15c1-47d7-8fa3-67377d8bb3e6`
-- Repo GitHub : git@github.com:yogeek/home-planner.git (branche main, push régulier demandé)
-- Higgsfield AI dispo via Chrome (claude-in-chrome) pour générer des visuels si utile
-- Chrome CDP dispo pour les tests E2E
-- Timezone famille : Indian/Reunion (UTC+4). Crons UTC : 03:00 (matin 7h), 14:30 (soir 18h30), dim 14:00 (génération semaine)
-- Erreurs d'auth Cloudflare transitoires observées : réessayer la commande wrangler suffit
-- Syntaxe cron Cloudflare : utiliser `SUN`, pas `0`, pour dimanche
-- Consignes utilisateur : tout en français, jamais de tirets cadratins, mettre à jour HANDOFF.md + AGENTS.md + README.md à chaque étape
+## Vérifié par audit E2E (Chrome + Playwright mobile 390x844)
 
-## Avancement (14 tâches, voir plan)
+Onboarding complet, choix de profils, écran Village (scène animée, jauge, balançoire), complétion avec célébration et glands, réassignation dans Semaine (flag manual préservé à la régénération), courses (ajout, coche, checkout → historique → suggestions), file hors ligne (503 simulé puis resynchronisation), mode enfant (mission illustrée, validation parentale, confettis), mode tablette (>=1024px), temps réel entre 2 clients via WebSocket, double-done idempotent, auth 401.
 
-- [x] Task 1 : Scaffold + pipeline (Vite app/, worker/, wrangler.jsonc, D1 créée, deploy OK, health OK, SPA servie)
-- [x] Task 2 : Schéma D1 (migration 0001 appliquée local + remote) + defaults.ts
-- [x] Task 3 : shared/schedule.ts + dates.ts (17 tests)
-- [x] Task 4 : shared/village.ts (LEVELS 18 paliers, freshness, balance, streaks) + shopping.ts (36 tests au total)
-- [ ] Task 5 : API REST
-- [ ] Task 6 : DO temps réel
-- [ ] Task 7 : Crons + Web Push
-- [ ] Task 8 : Fondations frontend
-- [ ] Task 9 : Écran Village
-- [ ] Task 10 : Aujourd'hui + Semaine
-- [ ] Task 11 : Courses + offline
-- [ ] Task 12 : Enfant + tablette + Équilibre
-- [ ] Task 13 : PWA + push
-- [ ] Task 14 : E2E Chrome + deploy final + guide famille + GitHub Actions
+## Corrections issues de l'audit (toutes appliquées)
 
-## Prochaine étape
+1. Libellé de la balançoire inversé → utilise `balance.ratio`.
+2. `generateWeek(env, weekStart, fromDate)` : plus de tâches créées dans le passé (onboard et regenerate passent `today`, le cron hebdo prend la semaine entière).
+3. Titre « Journée libre ! » quand 0 mission (au lieu de « Tout est fait, bravo ! »).
+4. Journal du village crédite l'assigné (pas celui qui a coché sur la tablette).
+5. Pluriels corrigés.
+6. Onboarding : créatures bloquées uniquement par les habitants déjà validés + auto-réassignation.
 
-Task 5 : API REST complète dans worker/api.ts (endpoints listés dans le plan : /state, /onboard, /occurrences/*, /shopping/*, /tasks, /week/regenerate, /push/subscribe), avec worker/db.ts pour les requêtes D1.
+## Config Cloudflare
+
+- Worker `le-village`, compte boka.reunion@gmail.com. D1 `village-db` (264d7adb-...), migrations 0001+0002 appliquées local+remote.
+- Secrets prod : `FAMILY_TOKEN`, `VAPID_PUBLIC`, `VAPID_PRIVATE` (dev : `.dev.vars`, non commité ; le jeton famille est aussi dans `/tmp/family-token.txt` et dans le guide).
+- Crons UTC : `0 3 * * *` (résumé 7h), `30 14 * * *` (rappel 18h30), `0 14 * * SUN` (génération semaine, dim 18h). Syntaxe : `SUN`, pas `0`.
+- `nodejs_compat` requis (lib web-push).
+
+## CI/CD
+
+`.github/workflows/deploy.yml` : tests + typecheck + build à chaque push ; déploiement automatique si le secret GitHub `CLOUDFLARE_API_TOKEN` est configuré (à créer par Guillaume : Cloudflare dashboard → My Profile → API Tokens → modèle « Edit Cloudflare Workers » + permission D1:Edit, puis GitHub repo → Settings → Secrets → Actions). Sans le secret, la CI passe et saute le déploiement (warning). Déploiement local : `npm run deploy`.
+
+## Points en suspens (non bloquants)
+
+- Push non testé de bout en bout sur un vrai téléphone (l'abonnement et l'envoi sont implémentés ; à valider quand la famille active les notifications).
+- Rappels à heure précise (`reminder_time`) : mentionnés dans les pushes matin/soir, pas de push à l'heure exacte (choix v1).
+- Rayon des articles : « autre » par défaut, appris via l'historique d'achats ; pas de sélecteur manuel (v1).
+- Écran de gestion des définitions de tâches (task_defs) : l'API existe (`POST/PUT /tasks`), pas d'UI dédiée (les défauts couvrent le foyer ; modifiable via API si besoin).
+- QR code du lien famille non généré (pas d'outil dispo) ; le bouton « Inviter » de l'app partage le lien.
+
+## Idées v2 (si la famille accroche)
+
+Visuels générés par Higgsfield AI pour enrichir la scène, accessoires cosmétiques des créatures (les jalons existent côté données), personnalisation des tâches dans l'UI, historique long terme, récompenses réelles pour le petit.

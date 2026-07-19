@@ -1,0 +1,27 @@
+- generic [ref=e202]:
+  - generic [ref=e413]:
+    - generic [ref=e414]:
+      - heading "1 mission pour toi" [level=2] [ref=e415]
+      - generic [ref=e416]: dimanche 19 juillet
+    - generic [ref=e418]:
+      - button "Marquer fait" [ref=e419] [cursor=pointer]: ⬜
+      - generic [ref=e420] [cursor=pointer]:
+        - generic [ref=e421]: Préparer les repas
+        - generic [ref=e422]: 🍲 La grande table · 🌰🌰🌰
+  - navigation "Navigation principale" [ref=e401]:
+    - button "Village" [ref=e402] [cursor=pointer]:
+      - generic [ref=e403]: 🏡
+      - text: Village
+    - button "Aujourd'hui 1" [active] [ref=e404] [cursor=pointer]:
+      - generic [ref=e405]: ☀️
+      - text: Aujourd'hui
+      - generic [ref=e406]: "1"
+    - button "Semaine" [ref=e407] [cursor=pointer]:
+      - generic [ref=e408]: 🗓️
+      - text: Semaine
+    - button "Courses" [ref=e409] [cursor=pointer]:
+      - generic [ref=e410]: 🧺
+      - text: Courses
+    - button "Plus" [ref=e411] [cursor=pointer]:
+      - generic [ref=e412]: 🌙
+      - text: Plus

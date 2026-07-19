@@ -23,8 +23,5 @@
   "triggers": {
     "crons": ["0 3 * * *", "30 14 * * *", "0 14 * * SUN"]
   },
-  "vars": {
-    "FAMILY_TOKEN": "dev-token"
-  },
   "observability": { "enabled": true }
 }

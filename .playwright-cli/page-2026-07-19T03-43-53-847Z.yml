@@ -1,0 +1,26 @@
+- generic [ref=e5]:
+  - heading "Habitant n°1" [level=2] [ref=e6]
+  - textbox "Ton prénom" [active] [ref=e7]
+  - paragraph [ref=e8]: "Choisis ta créature :"
+  - generic [ref=e9]:
+    - button "renard renard" [pressed] [ref=e10] [cursor=pointer]:
+      - img "renard" [ref=e11]
+      - generic [ref=e25]: renard
+    - button "chouette chouette" [ref=e26] [cursor=pointer]:
+      - img "chouette" [ref=e27]
+      - generic [ref=e43]: chouette
+    - button "panda roux panda roux" [ref=e44] [cursor=pointer]:
+      - img "panda roux" [ref=e45]
+      - generic [ref=e63]: panda roux
+    - button "hérisson hérisson" [ref=e64] [cursor=pointer]:
+      - img "hérisson" [ref=e65]
+      - generic [ref=e82]: hérisson
+    - button "lapin lapin" [ref=e83] [cursor=pointer]:
+      - img "lapin" [ref=e84]
+      - generic [ref=e103]: lapin
+    - button "ours ours" [ref=e104] [cursor=pointer]:
+      - img "ours" [ref=e105]
+      - generic [ref=e122]: ours
+  - generic [ref=e123]:
+    - button "Retour" [ref=e124] [cursor=pointer]
+    - button "Suivant" [disabled] [ref=e125]
