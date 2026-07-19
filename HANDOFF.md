@@ -2,9 +2,9 @@
 
 > Reprise : lire ce fichier, puis `docs/superpowers/plans/2026-07-18-le-village.md` et `docs/superpowers/specs/2026-07-18-le-village-design.md`.
 
-## Statut : ✅ TERMINÉ ET DÉPLOYÉ
+## Statut : ✅ v1 DÉPLOYÉE + retours utilisateur intégrés (19/07)
 
-Les 14 tâches du plan sont faites. L'application est en production, testée E2E, prête pour la famille.
+Les 14 tâches du plan sont faites, plus deux vagues de retours de Guillaume (mode tableau opt-in + réglages ; catégories personnalisées + clairière + CRUD complet). En cours : boucle d'évaluation par agents « famille » (documentée ci-dessous si interrompue).
 
 - **URL prod** : https://le-village.boka-reunion.workers.dev
 - **Lien famille (secret)** : voir `docs/GUIDE-FAMILLE.md` (jeton `FAMILY_TOKEN` en secret Cloudflare)
