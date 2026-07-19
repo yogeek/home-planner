@@ -117,8 +117,18 @@ function TaskCard({ occ }: { occ: Occurrence }) {
     }
     setPopping(true);
     setTimeout(() => setPopping(false), 700);
+    // Combien de missions me restent-il après celle-ci ?
+    const restantes = (state?.week ?? []).filter(
+      (o) => o.date === occ.date && o.assignee === occ.assignee && o.status === 'todo' && o.id !== occ.id,
+    ).length;
     void doneOccurrence(occ);
-    setTimeout(() => setTab('village'), 900);
+    if (restantes === 0) {
+      // Dernière du jour : on savoure la récompense sur le village
+      setTimeout(() => setTab('village'), 900);
+    } else {
+      // Il en reste : on reste sur la liste pour enchaîner
+      notifyInfo(`+${occ.weight} 🌰 · encore ${restantes} mission${restantes > 1 ? 's' : ''} 🌿`);
+    }
   }
 
   return (

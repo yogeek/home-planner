@@ -34,6 +34,12 @@ async function broadcast(env: Env, payload: unknown): Promise<void> {
   });
 }
 
+/** Garde 1 à 4 caractères Unicode complets (évite de couper une paire de substitution / séquence emoji) */
+function cleanEmoji(raw: string | undefined): string {
+  const chars = Array.from((raw ?? '').trim());
+  return chars.length ? chars.slice(0, 4).join('') : '⭐';
+}
+
 async function readBody(request: Request): Promise<Record<string, unknown>> {
   try {
     return (await request.json()) as Record<string, unknown>;
@@ -421,7 +427,7 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       const zone = SCENE_ZONES.includes(body.zone as (typeof SCENE_ZONES)[number]) ? (body.zone as string) : 'loisirs';
       await db
         .prepare('INSERT INTO categories (id, label, emoji, zone, builtin) VALUES (?, ?, ?, ?, 0)')
-        .bind(crypto.randomUUID(), label, ((body.emoji as string) || '⭐').trim().slice(0, 8), zone)
+        .bind(crypto.randomUUID(), label, cleanEmoji(body.emoji as string), zone)
         .run();
       notify();
       return json(await buildState(env));
@@ -446,7 +452,7 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
           .prepare('UPDATE categories SET label = ?, emoji = ?, zone = ? WHERE id = ?')
           .bind(
             ((body.label as string) ?? cat.label).trim() || cat.label,
-            ((body.emoji as string) || cat.emoji).trim().slice(0, 8),
+            cleanEmoji((body.emoji as string) || cat.emoji),
             cat.builtin ? cat.zone : zone,
             cat.id,
           )
