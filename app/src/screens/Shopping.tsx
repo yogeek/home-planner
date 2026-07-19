@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { AISLE_ORDER, AISLE_EMOJI } from '../zones';
 import type { ShoppingItem } from '../types';
+import { useEscape } from '../useEscape';
 import './shopping.css';
 
 /** Fiche article : changer de rayon ou de quantité */
 function ItemSheet({ item, onClose }: { item: ShoppingItem; onClose: () => void }) {
+  useEscape(onClose);
   const updateShoppingItem = useStore((s) => s.updateShoppingItem);
   return (
     <div className="sheet-backdrop" onClick={onClose}>

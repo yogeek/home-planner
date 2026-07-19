@@ -4,6 +4,7 @@ import { api } from '../api';
 import { ZONE_META, catInfo } from '../zones';
 import { SCENE_ZONES } from '@shared/types';
 import type { AppState, Category, TaskDef } from '../types';
+import { useEscape } from '../useEscape';
 import './tasksettings.css';
 
 const DAY_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -95,6 +96,7 @@ export function TaskSettings({ onClose }: { onClose: () => void }) {
 }
 
 function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void }) {
+  useEscape(onClose);
   const state = useStore((s) => s.state);
   const applyState = useStore((s) => s.applyState);
   const [title, setTitle] = useState(def?.title ?? '');
@@ -265,6 +267,7 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
 }
 
 function CategorySheet({ cat, onClose }: { cat: Category | null; onClose: () => void }) {
+  useEscape(onClose);
   const state = useStore((s) => s.state);
   const applyState = useStore((s) => s.applyState);
   const [label, setLabel] = useState(cat?.label ?? '');

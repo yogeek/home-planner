@@ -4,7 +4,11 @@
 
 ## Statut : ✅ v1 DÉPLOYÉE + retours utilisateur intégrés (19/07)
 
-Les 14 tâches du plan sont faites, plus deux vagues de retours de Guillaume (mode tableau opt-in + réglages ; catégories personnalisées + clairière + CRUD complet). En cours : boucle d'évaluation par agents « famille » (documentée ci-dessous si interrompue).
+Les 14 tâches du plan sont faites, plus deux vagues de retours de Guillaume (mode tableau opt-in + réglages ; catégories personnalisées + clairière + CRUD complet), plus une boucle d'évaluation par agents « famille » TERMINÉE avec succès.
+
+## Boucle d'évaluation agents « famille » (19/07, terminée)
+
+3 personas (Papa mobile pressé, Maman organisée/équité, Tablette+enfant 4 ans) sur environnements isolés (wrangler dev ports 8791-8793, --persist-to séparés). Résultat final : Papa SATISFAIT 8/10, Maman SATISFAITE 8,5/10, Tablette SATISFAIT 9/10 (tableau) et 8/10 (enfant), zéro bug bloquant observé. Correctifs issus des cycles : rayons de courses devinés par mots-clés (shared/aisles.ts, côté serveur ET client), quantités « ×n » au lieu du refus de doublon (migration 0004), fiche article (rayon/quantité), pénibilité visible dans Semaine, vraie case à cocher ronde, toasts de confirmation partout, message balançoire neutre à 0-0, choix de la personne (dont l'enfant) à l'ajout rapide, ajout rapide depuis Aujourd'hui, fermeture des fiches par Échap. Leçon méthodo : les « bugs » des tests concurrents sur une même base étaient des artefacts (isoler les testeurs), et exiger des agents un test UI-only (jamais de lecture du code source).
 
 - **URL prod** : https://le-village.boka-reunion.workers.dev
 - **Lien famille (secret)** : voir `docs/GUIDE-FAMILLE.md` (jeton `FAMILY_TOKEN` en secret Cloudflare)

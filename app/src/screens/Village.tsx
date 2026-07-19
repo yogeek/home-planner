@@ -5,6 +5,7 @@ import { Creature } from '../components/Creature';
 import { ZONE_META, catInfo } from '../zones';
 import { LEVELS } from '@shared/village';
 import type { Zone } from '../types';
+import { useEscape } from '../useEscape';
 import './village.css';
 
 export function Village() {
@@ -115,6 +116,7 @@ export function Village() {
 }
 
 function ZoneSheet({ zone, onClose }: { zone: Zone; onClose: () => void }) {
+  useEscape(onClose);
   const state = useStore((s) => s.state);
   if (!state) return null;
   const meta = ZONE_META[zone];

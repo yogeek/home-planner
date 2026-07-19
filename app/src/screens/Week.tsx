@@ -5,6 +5,7 @@ import { catInfo } from '../zones';
 import { addDays } from '@shared/dates';
 import { api } from '../api';
 import type { Occurrence } from '../types';
+import { useEscape } from '../useEscape';
 import './week.css';
 
 const DAY_NAMES = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -74,6 +75,7 @@ export function Week() {
 }
 
 function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
+  useEscape(onClose);
   const state = useStore((s) => s.state);
   const moveOccurrence = useStore((s) => s.moveOccurrence);
   const undoOccurrence = useStore((s) => s.undoOccurrence);
@@ -225,6 +227,7 @@ function MoveSheet({ occ, onClose }: { occ: Occurrence; onClose: () => void }) {
 }
 
 export function AddSheet({ onClose }: { onClose: () => void }) {
+  useEscape(onClose);
   const state = useStore((s) => s.state);
   const addOccurrence = useStore((s) => s.addOccurrence);
   const notifyInfo = useStore((s) => s.notifyInfo);
