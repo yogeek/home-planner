@@ -27,7 +27,8 @@
 - Timezone famille : Indian/Reunion (UTC+4), constante `TZ` dans shared.
 - Modèle : le champ `zone` de task_defs/occurrences est un ID DE CATÉGORIE (table `categories`, migration 0003). Chaque catégorie pointe vers une des 7 zones de la scène (`SCENE_ZONES` : jardin, piscine, lessive, cuisine, courses, rangement, loisirs). Les 7 catégories intégrées ont le même id que leur zone. Helper front : `catInfo(state.categories, id)`.
 - Auth : token familial unique (var `FAMILY_TOKEN`, secret en prod, `.dev.vars` en local = dev-token), Bearer ou `?k=`.
-- API : /state, /onboard, /occurrences (POST, PUT/DELETE /:id, /:id/done|undo|move|skip), /shopping (+/:id/check|uncheck|remove, /checkout, suggestions dans /state), /tasks (POST, PUT/DELETE /:id), /categories (POST, PUT/DELETE /:id), /week/regenerate, /push/subscribe, /members/:id/prefs, /ws (WebSocket).
+- API : /state, /onboard, /occurrences (POST, PUT/DELETE /:id, /:id/done|undo|move|skip), /shopping (+/:id PUT rayon/qty, /:id/check|uncheck|remove, /checkout, suggestions dans /state), /tasks (POST, PUT/DELETE /:id), /categories (POST, PUT/DELETE /:id), /week/regenerate, /push/subscribe, /members/:id/prefs, /reset (POST {confirm:"EFFACER"}, remise à zéro totale, garde les catégories intégrées), /ws (WebSocket).
+- Pour réinitialiser un environnement de test : POST /reset avec {"confirm":"EFFACER"} puis POST /onboard.
 - Commits fréquents, push sur origin main (github.com/yogeek/home-planner).
 - Mettre à jour `HANDOFF.md` (avancement) et `README.md` à chaque étape significative.
 - Erreurs auth Cloudflare transitoires : réessayer la commande wrangler.

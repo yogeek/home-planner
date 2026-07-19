@@ -466,6 +466,25 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
       return json(await buildState(env));
     }
 
+    // Remise à zéro complète du village (irréversible)
+    if (path === '/reset' && method === 'POST') {
+      const body = await readBody(request);
+      if (body.confirm !== 'EFFACER') return json({ error: 'Confirmation manquante' }, 400);
+      await db.batch([
+        db.prepare('DELETE FROM occurrences'),
+        db.prepare('DELETE FROM shopping_items'),
+        db.prepare('DELETE FROM purchase_history'),
+        db.prepare('DELETE FROM progress'),
+        db.prepare('DELETE FROM push_subs'),
+        db.prepare('DELETE FROM task_defs'),
+        db.prepare('DELETE FROM village'),
+        db.prepare('DELETE FROM categories WHERE builtin = 0'),
+        db.prepare('DELETE FROM members'),
+      ]);
+      notify();
+      return json(await buildState(env));
+    }
+
     if (path === '/push/subscribe' && method === 'POST') {
       const body = await readBody(request);
       const sub = body.subscription as { endpoint: string; keys: Record<string, string> };

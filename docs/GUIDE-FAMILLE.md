@@ -34,6 +34,10 @@ C'est tout. Le village est né, la semaine est déjà organisée et répartie é
 
 Dans « Plus » → « Activer sur cet appareil » : un résumé le matin (7h) et un rappel le soir (18h30) seulement s'il reste quelque chose d'important. Jamais de harcèlement.
 
+## Tout remettre à zéro
+
+En bas de l'écran « Plus », la « ⚠️ Zone dangereuse » permet de réinitialiser complètement le village (habitants, glands, niveaux, historique, courses...). C'est définitif et ça concerne toute la famille : il faut taper EFFACER pour confirmer. Utile si vous voulez repartir de zéro après une période de test.
+
 ## La philosophie
 
 La balançoire de l'écran Village montre l'équilibre de la semaine entre vous deux. Si elle penche, ce n'est pas un tribunal : c'est une invitation à échanger une tâche. On construit le village ensemble, chacun à sa mesure.
