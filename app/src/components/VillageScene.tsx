@@ -44,11 +44,14 @@ function ZoneG({
   label: string;
   children: React.ReactNode;
 }) {
-  const f = freshness / 100;
+  // « Négligence » : 0 dès qu'une zone est en bon état (fraîcheur >= 55, le point neutre),
+  // 1 quand elle atteint le plancher (15). Une zone saine reste donc pleine et vive ;
+  // seule une zone vraiment délaissée se ternit doucement.
+  const neglect = Math.min(1, Math.max(0, (55 - freshness) / 40));
   return (
     <g
       className={`vz ${celebrate ? 'vz-celebrate' : ''}`}
-      style={{ filter: `saturate(${0.45 + 0.55 * f})`, opacity: 0.62 + 0.38 * f }}
+      style={{ filter: `saturate(${1 - 0.45 * neglect})`, opacity: 1 - 0.3 * neglect }}
       onClick={() => onTap(zone)}
       role="button"
       aria-label={label}
