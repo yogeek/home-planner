@@ -1,8 +1,0 @@
-- generic [ref=e706]:
-  - button "Quitter le mode enfant" [ref=e707] [cursor=pointer]: 🚪
-  - generic [ref=e708]:
-    - img "panda roux" [ref=e709]
-    - heading "Tes missions, Petit Lion" [level=1] [ref=e727]
-  - button "Ranger mes jouets" [ref=e729] [cursor=pointer]:
-    - generic [ref=e730]: 🧸
-    - generic [ref=e731]: Ranger mes jouets

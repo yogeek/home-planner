@@ -1,9 +1,0 @@
-[  112282ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
-[  114938ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
-[  118945ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
-[  126952ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
-[  142959ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
-[  173647ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
-[  204298ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
-[  234841ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
-[  265736ms] [ERROR] WebSocket connection to 'ws://localhost:8787/api/ws?k=dev-token' failed: HTTP Authentication failed; no valid credentials available @ http://localhost:8787/assets/index-BnE-XLSA.js:8
