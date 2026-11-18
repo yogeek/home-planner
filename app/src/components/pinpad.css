@@ -1,0 +1,61 @@
+.pinpad {
+  text-align: center;
+}
+
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 14px 0 18px;
+}
+
+.pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--miel-fonce);
+  transition: background 0.15s ease;
+}
+
+.pin-dot.on {
+  background: var(--miel);
+}
+
+.pin-dots.shake {
+  animation: pin-shake 0.35s ease;
+}
+
+@keyframes pin-shake {
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+}
+
+.pin-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.pin-key {
+  height: 60px;
+  border-radius: 50%;
+  background: var(--parchemin-2);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--encre);
+}
+
+.pin-key.ghost {
+  background: transparent;
+  font-size: 1.2rem;
+}
+
+.pin-key:active {
+  transform: scale(0.94);
+}

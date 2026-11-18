@@ -8,6 +8,7 @@
   font-weight: 500;
   font-size: 0.9rem;
   padding: 8px 14px;
+  min-height: 44px;
   border-radius: 999px;
   background: var(--miel);
   box-shadow: var(--shadow-soft);
@@ -131,6 +132,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 44px;
   background: var(--blanc);
   border: 2px solid var(--parchemin-2);
   border-radius: 999px;
@@ -162,4 +164,77 @@
 .add-shared {
   color: var(--mousse);
   font-weight: 700;
+}
+
+.move-chip:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.week-switch {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.12);
+}
+
+.week-switch button {
+  flex: 1;
+  min-height: 40px;
+  border-radius: 999px;
+  color: var(--parchemin);
+  font-family: var(--font-display);
+}
+
+.week-switch button.active {
+  background: var(--parchemin);
+  color: var(--foret);
+}
+
+.week-switch .week-prepare {
+  background: var(--miel);
+  color: var(--foret);
+}
+
+.week-day.past h3 {
+  opacity: 0.7;
+}
+
+.week-task {
+  min-height: 48px;
+}
+
+.week-task.late {
+  border-left: 4px solid var(--argile);
+}
+
+.week-late {
+  font-size: 0.75rem;
+  color: var(--argile);
+  font-weight: 700;
+}
+
+.week-moment {
+  font-size: 0.85rem;
+}
+
+.week-open {
+  font-size: 1.2rem;
+  width: 26px;
+  text-align: center;
+}
+
+.week-day-add {
+  width: 100%;
+  min-height: 36px;
+  border: 2px dashed rgba(168, 196, 174, 0.35);
+  border-radius: var(--radius-s);
+  color: var(--mousse-claire);
+  font-size: 1.1rem;
+}
+
+.week-day-add:hover {
+  border-color: var(--mousse-claire);
 }

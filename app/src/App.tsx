@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { GameInfo } from './components/GameInfo';
 import { useStore, useMe } from './store';
 import { getToken } from './api';
 import { connectWs } from './ws';
@@ -46,7 +47,18 @@ function ErrorToast() {
   if (info) {
     return (
       <div className="toast info" role="status">
-        {info}
+        {info.msg}
+        {info.action && (
+          <button
+            className="toast-action"
+            onClick={() => {
+              info.action!.run();
+              useStore.setState({ info: null });
+            }}
+          >
+            {info.action.label}
+          </button>
+        )}
       </div>
     );
   }
@@ -63,6 +75,12 @@ export default function App() {
   const me = useMe();
 
   const hasToken = !!getToken();
+  // Explication du jeu à la toute première utilisation sur cet appareil
+  const [introOpen, setIntroOpen] = useState(() => !localStorage.getItem('village.seenIntro'));
+  const closeIntro = () => {
+    localStorage.setItem('village.seenIntro', '1');
+    setIntroOpen(false);
+  };
 
   useEffect(() => {
     if (!hasToken) return;
@@ -74,8 +92,22 @@ export default function App() {
   if (loading || !state) return <div className="spinner" aria-label="Chargement" />;
   if (!state.onboarded) return <Onboarding />;
   if (!me) return <ProfilePicker />;
-  if (me.role === 'child' || childMode) return <ChildMode />;
-  if (dashboard) return <Tablet />;
+  if (me.role === 'child' || childMode) {
+    return (
+      <>
+        <ChildMode childId={me.role === 'child' ? me.id : childMode!} />
+        <ErrorToast />
+      </>
+    );
+  }
+  if (dashboard) {
+    return (
+      <>
+        <Tablet />
+        <ErrorToast />
+      </>
+    );
+  }
 
   return (
     <div className="app-shell">
@@ -86,6 +118,7 @@ export default function App() {
       {tab === 'plus' && <More />}
       <TabBar />
       <ErrorToast />
+      {introOpen && <GameInfo onClose={closeIntro} />}
     </div>
   );
 }

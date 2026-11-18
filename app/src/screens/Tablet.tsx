@@ -15,6 +15,7 @@ export function Tablet() {
   const doneOccurrence = useStore((s) => s.doneOccurrence);
   const undoOccurrence = useStore((s) => s.undoOccurrence);
   const setDashboard = useStore((s) => s.setDashboard);
+  const setChildMode = useStore((s) => s.setChildMode);
   const refresh = useStore((s) => s.refresh);
   const [celebrateZone, setCelebrateZone] = useState<Zone | null>(null);
 
@@ -37,6 +38,7 @@ export function Tablet() {
   const nextUnlock = info.level < LEVELS.length ? LEVELS[info.level] : null;
   const time = timeOfDay(new Date());
   const openShopping = state.shopping.filter((i) => i.status === 'open');
+  const openTasks = state.week.filter((o) => o.assignee === null && o.status === 'todo' && o.date <= state.today);
 
   const dateFmt = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 
@@ -67,6 +69,12 @@ export function Tablet() {
             <div className="gauge-bar">
               <div className="gauge-fill" style={{ width: `${Math.max(3, info.progress * 100)}%` }} />
             </div>
+            {state.settings.weeklyGoal && (
+              <p className="gauge-next">
+                🎯 Objectif de la semaine : <strong>{Object.values(state.weekGlands).reduce((a, b) => a + b, 0)} / {state.settings.weeklyGoal} 🌰</strong>
+                {state.settings.goalReward ? ` → ${state.settings.goalReward}` : ''}
+              </p>
+            )}
             {nextUnlock && (
               <p className="gauge-next">
                 Prochain déblocage : <strong>{nextUnlock.unlock} {nextUnlock.emoji}</strong>{' '}
@@ -79,11 +87,18 @@ export function Tablet() {
         <div className="tablet-right">
           {members.map((m) => {
             const tasks = state.week.filter((o) => o.date === state.today && o.assignee === m.id);
+            const late = state.overdue.filter((o) => o.assignee === m.id && o.status === 'todo').length;
             return (
               <div key={m.id} className="card tablet-member">
                 <div className="tablet-member-head">
                   <Creature species={m.creature} size={40} mood={tasks.length > 0 && tasks.every((t) => t.status === 'done') ? 'joy' : 'normal'} />
                   <strong>{m.name}</strong>
+                  {late > 0 && <span className="tablet-late">{late} en retard</span>}
+                  {m.role === 'child' && (
+                    <button className="tablet-kid" onClick={() => setChildMode(m.id)}>
+                      🧸 Ses missions
+                    </button>
+                  )}
                   <span className="muted">
                     {tasks.filter((t) => t.status === 'done').length}/{tasks.length}
                   </span>
@@ -109,6 +124,25 @@ export function Tablet() {
               </div>
             );
           })}
+
+          {openTasks.length > 0 && (
+            <div className="card tablet-member">
+              <div className="tablet-member-head">
+                <span style={{ fontSize: '1.6rem' }}>🙋</span>
+                <strong>À prendre</strong>
+                <span className="muted">{openTasks.length}</span>
+              </div>
+              <ul>
+                {openTasks.map((t) => (
+                  <li key={t.id}>
+                    <button onClick={() => void doneOccurrence(t)} title="Marquer fait">
+                      ⬜ {catInfo(state.categories, t.zone).emoji} {t.title}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="card tablet-shopping">
             <div className="tablet-member-head">

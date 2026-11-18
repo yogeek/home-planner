@@ -1,6 +1,6 @@
 /* Service worker du Village : cache de l'app shell + notifications push */
 
-const CACHE = 'village-v1';
+const CACHE = 'village-v2';
 const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -26,8 +26,13 @@ self.addEventListener('fetch', (event) => {
         (hit) =>
           hit ??
           fetch(event.request).then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(event.request, copy));
+            // Ne jamais mettre en cache une page HTML servie à la place d'un asset (repli SPA pendant un déploiement) :
+            // sinon l'app resterait blanche sur cet appareil
+            const type = res.headers.get('Content-Type') ?? '';
+            if (res.ok && !type.includes('text/html')) {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(event.request, copy));
+            }
             return res;
           }),
       ),

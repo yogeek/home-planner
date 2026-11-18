@@ -57,6 +57,7 @@ export function Shopping() {
   const toggleShoppingItem = useStore((s) => s.toggleShoppingItem);
   const removeShoppingItem = useStore((s) => s.removeShoppingItem);
   const checkoutShopping = useStore((s) => s.checkoutShopping);
+  const notifyInfo = useStore((s) => s.notifyInfo);
   const [input, setInput] = useState('');
   const [detail, setDetail] = useState<ShoppingItem | null>(null);
 
@@ -70,6 +71,12 @@ export function Shopping() {
     ...state.suggestions.filter((l) => !inList.has(l.toLowerCase())).map((l) => ({ label: l, due: true })),
     ...state.frequent.filter((l) => !inList.has(l.toLowerCase()) && !state.suggestions.includes(l)).map((l) => ({ label: l, due: false })),
   ].slice(0, 8);
+  // Liste toute neuve : quelques classiques pour démarrer
+  const starters = ['Lait', 'Pain', 'Œufs', 'Beurre', 'Fruits', 'Papier toilette', 'Liquide vaisselle', 'Café'].filter(
+    (l) => !inList.has(l.toLowerCase()),
+  );
+  // Tant qu'il n'y a pas d'historique d'achats, on propose les classiques (ceux pas encore dans la liste)
+  const isNew = chips.length === 0 && state.frequent.length === 0 && starters.length > 0;
 
   const byAisle = (items: ShoppingItem[]) => {
     const groups = new Map<string, ShoppingItem[]>();
@@ -121,6 +128,19 @@ export function Shopping() {
         </div>
       )}
 
+      {isNew && (
+        <>
+          <p className="shop-starter-hint">Les classiques, en un geste :</p>
+          <div className="shop-chips">
+            {starters.map((l) => (
+              <button key={l} className="shop-chip" onClick={() => void add(l)}>
+                + {l}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
       {open.length === 0 && checked.length === 0 && (
         <div className="card shop-empty">
           <p className="display">Le panier est vide 🧺</p>
@@ -131,7 +151,7 @@ export function Shopping() {
       {[...byAisle(open)].map(([aisle, items]) => (
         <section key={aisle} className="shop-aisle">
           <h3>
-            {AISLE_EMOJI[aisle]} {aisle}
+            {AISLE_EMOJI[aisle]} <span className="shop-aisle-name">{aisle}</span>
           </h3>
           {items.map((item) => (
             <div key={item.id} className="shop-item">
@@ -166,7 +186,13 @@ export function Shopping() {
               </div>
             ))}
           </section>
-          <button className="btn shop-checkout" onClick={() => void checkoutShopping()}>
+          <button
+            className="btn shop-checkout"
+            onClick={async () => {
+              await checkoutShopping();
+              notifyInfo('Courses terminées, merci ! La tâche « courses » est cochée 🛒🌰');
+            }}
+          >
             🛒 Terminer les courses ({checked.length})
           </button>
         </>

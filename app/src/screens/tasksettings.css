@@ -142,3 +142,14 @@
   margin: 0 0 6px;
   text-align: center;
 }
+
+.tset-role-desc {
+  margin: -8px 0 12px;
+}
+
+.tset-date input {
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  color: var(--encre);
+}

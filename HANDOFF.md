@@ -2,9 +2,21 @@
 
 > Reprise : lire ce fichier, puis `docs/superpowers/plans/2026-07-18-le-village.md` et `docs/superpowers/specs/2026-07-18-le-village-design.md`.
 
-## Statut : ✅ v1 DÉPLOYÉE + retours utilisateur intégrés (19/07)
+## Statut : ✅ v2 (revue complète du 18/11/2026) : foyer flexible complet, entraide, enfants, vacances
 
 Les 14 tâches du plan sont faites, plus deux vagues de retours de Guillaume (mode tableau opt-in + réglages ; catégories personnalisées + clairière + CRUD complet), plus une boucle d'évaluation par agents « famille » TERMINÉE avec succès.
+
+## Revue complète + « Village v2 » (18/11/2026) : TERMINÉ
+
+Audit UI complet (Playwright mobile 390x844 + tablette 1280) puis implémentation de toutes les recommandations :
+- **Bugs foyer flexible corrigés** : mode enfant par enfant (`ChildMode childId`, `store.childMode: string | null`), une maison par habitant (`layoutHouses`), équipe complète dans Aujourd'hui, « Confier à » n'importe qui, réassignation de toutes les tâches dans Semaine, notification du matin pour tous les enfants.
+- **Données** : migration 0006 (rôle `teen`, `away_until`, `busy_days`, occurrences `assignee` nullable = « à prendre », `moment`, `handed_by`, task_defs `moment`/`pool`, tables `settings`, `thanks`, `rewards`, `reward_claims`, `swaps`). La table members a été reconstruite (CHECK sur le rôle).
+- **Répartition** (`shared/schedule.ts`) : options `teens` (poids <= 3, part moitié), `initialLoad` (tâches gardées), `isAvailable` (absences, jours chargés), tâches `pool`, tâches hebdo étalées sur la semaine (décalage stable par tâche). `generateWeek` ne touche plus rien avant `fromDate` (les retards survivent au rééquilibrage) et respecte le mode vacances.
+- **Logique pure** `shared/harvest.ts` : message d'entraide basé sur le retard réel (rien avant jeudi), `weekRecap`, `isAvailable`. `shared/defaults.ts` : `defaultTaskDefs({garden,pool,pet})`.
+- **API** : `/occurrences/:id/take|thanks`, `/swaps` (+ accept/decline), `/settings` (objectif, vacances), `/pin` + `/pin/check` (empreinte SHA-256), `/rewards` (+ claim avec code), checkout des courses qui coche la tâche courses. État : `overdue`, `nextWeek`, `lastWeek`, `settings`, `thanks`, `swaps`, `rewards`, `claims`, `stars`.
+- **Cron** : un seul déclencheur `*/15 * * * *` (matin 03:00 UTC, soir 14:30 UTC, génération dimanche 14:00 UTC, rappels à heure précise). `runCron(scheduledTime)`.
+- **UI** : retards, « à prendre », mercis, échanges, confier avec annulation (toast avec action), fête de fin de journée, bilan dimanche/lundi, semaine prochaine, objectif de famille, vacances, code parent (PinPad), tirelire et récompenses, lecture à voix haute, onboarding ado + maison, cibles tactiles 44px, couleurs distinctes par habitant, dates en minuscules.
+- **Service worker** (v2) : ne met plus en cache une page HTML servie à la place d'un asset (sinon écran blanc après un déploiement).
 
 ## 2e chantier panel (19/07) : foyer flexible, récolte, accessibilité — TERMINÉ
 

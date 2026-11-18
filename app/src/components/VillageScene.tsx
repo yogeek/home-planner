@@ -63,7 +63,9 @@ function ZoneG({
 
 /** Maison d'un habitant, avec sa créature devant et une plaque à son prénom */
 function House({ x, y, color, creature, name, scale = 1 }: { x: number; y: number; color: string; creature: string; name: string; scale?: number }) {
-  const plateW = Math.max(38, name.length * 6.2 + 18);
+  // Le prénom reste lisible même quand la maison est réduite (grandes familles)
+  const fs = Math.max(10, 10.5 / scale);
+  const plateW = Math.max(38, name.length * fs * 0.62 + 16);
   return (
     <g transform={`translate(${x} ${y}) scale(${scale})`}>
       {/* ombre au sol */}
@@ -82,16 +84,43 @@ function House({ x, y, color, creature, name, scale = 1 }: { x: number; y: numbe
       <rect x="4" y="-7" width="11" height="10" rx="1.5" fill="#fdf3da" stroke="#b9a686" strokeWidth="0.9" />
       <line x1="9.5" y1="-7" x2="9.5" y2="3" stroke="#b9a686" strokeWidth="0.7" />
       {/* créature devant, à droite pour ne pas empiéter à gauche */}
-      <foreignObject x="13" y="-4" width="30" height="30">
-        <Creature species={creature} size={28} />
+      <foreignObject x="17" y="-13" width="28" height="28">
+        <Creature species={creature} size={26} />
       </foreignObject>
       {/* plaque prénom */}
-      <rect x={-plateW / 2} y="18" width={plateW} height="16" rx="8" fill="#fbf6ec" stroke="#b9a686" strokeWidth="1" />
-      <text x="0" y="29" textAnchor="middle" fontSize="10" fontWeight="600" fill="#2c4f44" fontFamily="Fredoka">
+      <rect x={-plateW / 2} y="18" width={plateW} height={fs + 6} rx={(fs + 6) / 2} fill="#fbf6ec" stroke="#b9a686" strokeWidth="1" />
+      <text x="0" y={18 + fs * 0.98} textAnchor="middle" fontSize={fs} fontWeight="600" fill="#2c4f44" fontFamily="Fredoka">
         {name}
       </text>
     </g>
   );
+}
+
+const ROOF_COLORS = ['#c96f4a', '#8b6fae', '#6e9075', '#5b8fb9', '#c25b7a', '#b8873a', '#4f7d74', '#9c7b52'];
+
+/** Le hameau : une maison par habitant, les grands aux extrémités, les petits au milieu, tout le monde tient */
+export function layoutHouses(members: Member[]) {
+  const adults = members.filter((m) => m.role === 'adult');
+  const young = members.filter((m) => m.role !== 'adult');
+  const half = Math.ceil(adults.length / 2);
+  const ordered = [...adults.slice(0, half), ...young, ...adults.slice(half)];
+  const n = ordered.length;
+  // Le hameau reste entre le lavoir et la clairière (x 65 à 325)
+  const span = n <= 1 ? 0 : Math.min(260, (n - 1) * 94);
+  const center = n <= 2 ? 200 : 195;
+  const fit = n <= 3 ? 1 : Math.max(0.66, 3.3 / n);
+  return ordered.map((m, i) => {
+    const big = m.role === 'adult';
+    const scale = (big ? 1.1 : m.role === 'teen' ? 1 : 0.92) * fit;
+    return {
+      member: m,
+      x: n <= 1 ? 200 : center - span / 2 + (i * span) / (n - 1),
+      // Les maisons plus petites descendent un peu pour rester posées sur la colline
+      y: 101 + (1.1 - scale) * 22 + (n > 5 && i % 2 ? 8 : 0),
+      scale,
+      color: ROOF_COLORS[members.indexOf(m) % ROOF_COLORS.length],
+    };
+  });
 }
 
 /** Décorations débloquées par niveau, disséminées dans la scène */
@@ -119,8 +148,7 @@ const DECOR: { x: number; y: number; emoji: string; size: number }[] = [
 export function VillageScene({ freshness, members, unlockedCount, time, celebrateZone, onZoneTap }: Props) {
   const [skyTop, skyMid, skyLow] = SKIES[time];
   const night = time === 'nuit';
-  const adults = members.filter((m) => m.role === 'adult');
-  const child = members.find((m) => m.role === 'child');
+  const houses = layoutHouses(members);
   const fJardin = freshness.jardin ?? 55;
   const fPiscine = freshness.piscine ?? 55;
 
@@ -182,9 +210,9 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
       ))}
 
       {/* Le hameau : les maisons des habitants, dégagées au-dessus des zones */}
-      {adults[0] && <House x={106} y={101} color="#c96f4a" creature={adults[0].creature} name={adults[0].name} scale={1.1} />}
-      {child && <House x={200} y={107} color="#6e9075" creature={child.creature} name={child.name} scale={0.92} />}
-      {adults[1] && <House x={292} y={101} color="#8b6fae" creature={adults[1].creature} name={adults[1].name} scale={1.1} />}
+      {houses.map((h) => (
+        <House key={h.member.id} x={h.x} y={h.y} color={h.color} creature={h.member.creature} name={h.member.name} scale={h.scale} />
+      ))}
 
       {/* --- Zone : potager (jardin) --- */}
       <ZoneG zone="jardin" freshness={fJardin} celebrate={celebrateZone === 'jardin'} onTap={onZoneTap} label="Le potager">
@@ -206,7 +234,7 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
             <path d="M120 198 q2 -8 -3 -11" fill="none" />
           </g>
         )}
-        <text x="92" y="238" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
+        <text x="92" y="238" textAnchor="middle" fontSize="10.5" fontWeight="600" fill={night ? '#e6ecdf' : '#26332e'} stroke={night ? '#1f3a33' : '#f4efe2'} strokeWidth="2.6" paintOrder="stroke" fontFamily="Fredoka">
           Le potager
         </text>
       </ZoneG>
@@ -229,7 +257,7 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
           </g>
         )}
         <path d="M282 224 q6 -10 14 -12" stroke="#8a6a45" strokeWidth="3" fill="none" strokeLinecap="round" />
-        <text x="322" y="244" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
+        <text x="322" y="244" textAnchor="middle" fontSize="10.5" fontWeight="600" fill={night ? '#e6ecdf' : '#26332e'} stroke={night ? '#1f3a33' : '#f4efe2'} strokeWidth="2.6" paintOrder="stroke" fontFamily="Fredoka">
           La source
         </text>
       </ZoneG>
@@ -250,7 +278,7 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
         {[70, 79, 88].map((x, i) => (
           <rect key={i} x={x} y={148 - i * 1.2} width="6" height="8" rx="1" fill={['#e8a548', '#7fa8c9', '#d97b93'][i]} className="linge" />
         ))}
-        <text x="46" y="184" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
+        <text x="46" y="184" textAnchor="middle" fontSize="10.5" fontWeight="600" fill={night ? '#e6ecdf' : '#26332e'} stroke={night ? '#1f3a33' : '#f4efe2'} strokeWidth="2.6" paintOrder="stroke" fontFamily="Fredoka">
           Le lavoir
         </text>
       </ZoneG>
@@ -268,7 +296,7 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
             <circle cx="209" cy="201" r="3" fill="#e8a548" />
           </g>
         )}
-        <text x="196" y="238" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
+        <text x="196" y="238" textAnchor="middle" fontSize="10.5" fontWeight="600" fill={night ? '#e6ecdf' : '#26332e'} stroke={night ? '#1f3a33' : '#f4efe2'} strokeWidth="2.6" paintOrder="stroke" fontFamily="Fredoka">
           La grande table
         </text>
       </ZoneG>
@@ -292,7 +320,7 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
             <circle cx="310" cy="149" r="2.6" fill="#7fa8c9" />
           </g>
         )}
-        <text x="306" y="182" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
+        <text x="306" y="182" textAnchor="middle" fontSize="10.5" fontWeight="600" fill={night ? '#e6ecdf' : '#26332e'} stroke={night ? '#1f3a33' : '#f4efe2'} strokeWidth="2.6" paintOrder="stroke" fontFamily="Fredoka">
           Le marché
         </text>
       </ZoneG>
@@ -307,7 +335,7 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
           <path d="M152 168 L158 156" />
           <path d="M156 168 L150 158" />
         </g>
-        <text x="133" y="184" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
+        <text x="133" y="184" textAnchor="middle" fontSize="10.5" fontWeight="600" fill={night ? '#e6ecdf' : '#26332e'} stroke={night ? '#1f3a33' : '#f4efe2'} strokeWidth="2.6" paintOrder="stroke" fontFamily="Fredoka">
           L'atelier
         </text>
       </ZoneG>
@@ -327,7 +355,7 @@ export function VillageScene({ freshness, members, unlockedCount, time, celebrat
           <line x1="346" y1="132" x2="346" y2="146" />
         </g>
         <path d="M346 132 L354 134 L346 137 Z" fill="#e8a548" />
-        <text x="368" y="160" textAnchor="middle" fontSize="7.4" fill={night ? '#cfd8c4' : '#33493d'} fontFamily="Fredoka">
+        <text x="368" y="160" textAnchor="middle" fontSize="10.5" fontWeight="600" fill={night ? '#e6ecdf' : '#26332e'} stroke={night ? '#1f3a33' : '#f4efe2'} strokeWidth="2.6" paintOrder="stroke" fontFamily="Fredoka">
           La clairière
         </text>
       </ZoneG>

@@ -158,6 +158,8 @@ select {
   bottom: 0;
   left: 0;
   right: 0;
+  max-width: 640px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
@@ -178,6 +180,7 @@ select {
   border-radius: var(--radius-s);
   transition: transform 0.2s ease, color 0.2s ease;
   min-width: 56px;
+  min-height: 48px;
 }
 
 .tab .tab-icon {
@@ -286,4 +289,50 @@ select {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Confettis */
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.confetto {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+  animation: confetti-fall 2s ease-in forwards;
+}
+
+.confetto.c0 { background: #e8a548; }
+.confetto.c1 { background: #d97b93; }
+.confetto.c2 { background: #7fa8c9; }
+.confetto.c3 { background: #6e9075; }
+.confetto.c4 { background: #c96f4a; }
+.confetto.c5 { background: #8b6fae; }
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(540deg);
+    opacity: 0.6;
+  }
+}
+
+.toast-action {
+  margin-left: 12px;
+  padding: 6px 12px;
+  min-height: 36px;
+  border-radius: 999px;
+  background: var(--parchemin);
+  color: var(--encre);
+  font-weight: 700;
 }

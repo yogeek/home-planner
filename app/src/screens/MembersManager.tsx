@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { useStore } from '../store';
 import { Creature, SPECIES } from '../components/Creature';
 import { useEscape } from '../useEscape';
-import type { Member } from '../types';
+import type { Member, Role } from '../types';
+import { ROLE_META, shortDay } from '../zones';
+import { addDays } from '@shared/dates';
+
+const DAY_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 import './tasksettings.css';
 
 /** Gestion des habitants du foyer (ajout, modification, retrait) */
@@ -21,8 +25,8 @@ export function MembersManager({ onClose }: { onClose: () => void }) {
           </button>
         </header>
         <p className="muted tset-hint">
-          Ajoute, modifie ou retire un habitant. Les tâches se répartissent automatiquement entre les adultes ; les
-          missions « enfant » vont aux enfants.
+          Ajoute, modifie ou retire un habitant. Les tâches se répartissent entre les adultes et les ados (part
+          réduite, tâches légères) ; les missions « enfant » vont aux enfants. Une absence redistribue ses tâches.
         </p>
         <div className="tset-list">
           {state.members.map((m) => (
@@ -32,7 +36,11 @@ export function MembersManager({ onClose }: { onClose: () => void }) {
               </span>
               <span className="tset-body">
                 <span className="tset-title">{m.name}</span>
-                <span className="tset-meta">{m.role === 'child' ? 'Enfant 🧸' : 'Adulte'}</span>
+                <span className="tset-meta">
+                  {ROLE_META[m.role].label}
+                  {m.awayUntil && m.awayUntil >= state.today ? ` · 🧳 absent(e) jusqu'au ${shortDay(m.awayUntil)}` : ''}
+                  {m.busyDays?.length ? ` · jours chargés : ${m.busyDays.map((d) => DAY_SHORT[d]).join(', ')}` : ''}
+                </span>
               </span>
               <span aria-hidden>›</span>
             </button>
@@ -55,7 +63,9 @@ function MemberSheet({ member, onClose }: { member: Member | null; onClose: () =
   const removeMember = useStore((s) => s.removeMember);
   const [name, setName] = useState(member?.name ?? '');
   const [creature, setCreature] = useState(member?.creature ?? SPECIES[0]);
-  const [role, setRole] = useState<'adult' | 'child'>(member?.role ?? 'adult');
+  const [role, setRole] = useState<Role>(member?.role ?? 'adult');
+  const [awayUntil, setAwayUntil] = useState<string | null>(member?.awayUntil ?? null);
+  const [busyDays, setBusyDays] = useState<number[]>(member?.busyDays ?? []);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -67,7 +77,7 @@ function MemberSheet({ member, onClose }: { member: Member | null; onClose: () =
     if (!name.trim() || busy) return;
     setBusy(true);
     try {
-      if (member) await updateMember(member.id, { name: name.trim(), creature, role });
+      if (member) await updateMember(member.id, { name: name.trim(), creature, role, awayUntil, busyDays });
       else await addMember({ name: name.trim(), creature, role });
       onClose();
     } finally {
@@ -95,22 +105,20 @@ function MemberSheet({ member, onClose }: { member: Member | null; onClose: () =
         <input className="ob-input" placeholder="Prénom" value={name} onChange={(e) => setName(e.target.value)} />
 
         <p className="muted">Rôle :</p>
-        <div className="move-row">
-          <button
-            className={`move-chip ${role === 'adult' ? 'active' : ''}`}
-            disabled={isLastAdult}
-            onClick={() => setRole('adult')}
-          >
-            Adulte
-          </button>
-          <button
-            className={`move-chip ${role === 'child' ? 'active' : ''}`}
-            disabled={isLastAdult}
-            onClick={() => setRole('child')}
-          >
-            🧸 Enfant
-          </button>
+        <div className="move-row wrap">
+          {(['adult', 'teen', 'child'] as const).map((r) => (
+            <button
+              key={r}
+              aria-pressed={role === r}
+              className={`move-chip ${role === r ? 'active' : ''}`}
+              disabled={isLastAdult && r !== 'adult'}
+              onClick={() => setRole(r)}
+            >
+              {ROLE_META[r].label}
+            </button>
+          ))}
         </div>
+        <p className="muted tset-role-desc">{ROLE_META[role].desc}</p>
         {isLastAdult && <p className="muted">C'est le seul adulte du foyer, son rôle ne peut pas changer.</p>}
 
         <p className="muted">Créature :</p>
@@ -125,6 +133,55 @@ function MemberSheet({ member, onClose }: { member: Member | null; onClose: () =
             </button>
           ))}
         </div>
+
+        {member && (
+          <>
+            <p className="muted">🧳 Absence (vacances, déplacement, garde alternée) :</p>
+            <div className="move-row wrap">
+              {[
+                { label: 'Présent(e)', v: null },
+                { label: '3 jours', v: addDays(state.today, 2) },
+                { label: '1 semaine', v: addDays(state.today, 6) },
+                { label: '2 semaines', v: addDays(state.today, 13) },
+              ].map((o) => (
+                <button
+                  key={o.label}
+                  aria-pressed={awayUntil === o.v}
+                  className={`move-chip ${awayUntil === o.v ? 'active' : ''}`}
+                  onClick={() => setAwayUntil(o.v)}
+                >
+                  {o.label}
+                </button>
+              ))}
+              <label className="move-chip tset-date">
+                jusqu'au
+                <input
+                  type="date"
+                  min={state.today}
+                  value={awayUntil ?? ''}
+                  onChange={(e) => setAwayUntil(e.target.value || null)}
+                />
+              </label>
+            </div>
+            {role !== 'child' && (
+              <>
+                <p className="muted">Jours chargés (pas de tâche en rotation ces jours-là) :</p>
+                <div className="move-row wrap">
+                  {DAY_SHORT.map((d, i) => (
+                    <button
+                      key={d}
+                      aria-pressed={busyDays.includes(i)}
+                      className={`move-chip day ${busyDays.includes(i) ? 'active' : ''}`}
+                      onClick={() => setBusyDays((cur) => (cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i]))}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        )}
 
         <button className="btn sheet-close" disabled={!name.trim() || busy} onClick={() => void save()}>
           {busy ? '...' : member ? 'Enregistrer' : 'Ajouter'}

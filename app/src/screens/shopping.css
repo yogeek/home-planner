@@ -72,7 +72,14 @@
   color: var(--mousse-claire);
   font-size: 0.9rem;
   margin: 0 2px 6px;
-  text-transform: capitalize;
+}
+
+.shop-aisle-name {
+  display: inline-block;
+}
+
+.shop-aisle-name::first-letter {
+  text-transform: uppercase;
 }
 
 .shop-aisle.checked h3 {
@@ -97,8 +104,9 @@
 
 .shop-check {
   font-size: 1.35rem;
-  padding: 6px;
-  margin: -6px 0;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -8px 0;
 }
 
 .shop-label {
@@ -125,8 +133,19 @@
 .shop-del {
   color: var(--encre-douce);
   font-size: 0.9rem;
-  padding: 8px;
-  margin: -8px -4px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -8px -6px -8px 0;
+}
+
+.shop-label {
+  min-height: 44px;
+}
+
+.shop-starter-hint {
+  color: var(--mousse-claire);
+  font-size: 0.85rem;
+  margin: 0 2px 6px;
 }
 
 .shop-checkout {

@@ -18,7 +18,6 @@
 
 .tablet-date {
   color: var(--mousse-claire);
-  text-transform: capitalize;
   flex: 1;
 }
 
@@ -92,4 +91,18 @@
 .tablet-member-head strong {
   flex: 1;
   font-family: var(--font-display);
+}
+
+.tablet-late {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--argile);
+}
+
+.tablet-kid {
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--parchemin-2);
+  font-size: 0.85rem;
 }

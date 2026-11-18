@@ -5,7 +5,6 @@
 .today-date {
   color: var(--mousse-claire);
   font-size: 0.85rem;
-  text-transform: capitalize;
 }
 
 .today-empty {
@@ -136,6 +135,7 @@
 
 .task-menu button {
   padding: 12px 16px;
+  min-height: 44px;
   text-align: left;
   font-size: 0.95rem;
 }
@@ -172,4 +172,144 @@
   font-size: 0.78rem;
   color: var(--mousse);
   font-weight: 700;
+}
+
+.task-more {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: var(--encre-douce);
+  line-height: 1;
+}
+
+.task-more:hover {
+  background: var(--parchemin-2);
+}
+
+.task-card.late {
+  border-left: 5px solid var(--argile);
+}
+
+.task-card.open {
+  border: 2px dashed var(--miel);
+}
+
+.task-take {
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
+.task-moment {
+  font-weight: 700;
+  color: var(--mousse);
+}
+
+.today-hint {
+  color: var(--mousse-claire);
+  font-size: 0.85rem;
+  margin: -4px 2px 10px;
+}
+
+.today-note {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+}
+
+.team-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.team-done {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.thanks-chip {
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--parchemin-2);
+  font-size: 0.85rem;
+}
+
+.thanks-chip.on {
+  background: #fdf0d6;
+  cursor: default;
+}
+
+.thanks-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  background: #fdf3dc;
+}
+
+.thanks-heart {
+  font-size: 2rem;
+  animation: star-pop 0.6s ease;
+}
+
+.thanks-body {
+  flex: 1;
+}
+
+.thanks-body p {
+  margin: 2px 0;
+}
+
+.thanks-ok {
+  width: 100%;
+}
+
+.swap-card {
+  margin-bottom: 12px;
+  border: 2px solid var(--miel);
+}
+
+.swap-card p {
+  margin: 0 0 10px;
+}
+
+.swap-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.swap-actions .btn {
+  flex: 1;
+}
+
+.swap-list section {
+  margin-bottom: 10px;
+}
+
+.swap-list h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 6px;
+  font-family: var(--font-display);
+}
+
+.swap-option {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: var(--radius-s);
+  background: var(--parchemin-2);
+  text-align: left;
 }

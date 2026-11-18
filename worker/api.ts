@@ -235,6 +235,16 @@ async function markDone(env: Env, occ: Occurrence, doneBy: string | null, valida
   }
 }
 
+/** Régénère la semaine en cours (à partir d'aujourd'hui) et la suivante si elle est déjà préparée */
+async function regenerateAhead(env: Env, today: string): Promise<void> {
+  const ws = weekStart(today);
+  await generateWeek(env, ws, today);
+  const next = await env.DB.prepare('SELECT 1 FROM occurrences WHERE date >= ? AND date <= ? LIMIT 1')
+    .bind(addDays(ws, 7), addDays(ws, 13))
+    .first();
+  if (next) await generateWeek(env, addDays(ws, 7), today);
+}
+
 export async function handleApi(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const url = new URL(request.url);
   const path = url.pathname.slice('/api'.length);
@@ -328,7 +338,7 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
         db.prepare('INSERT INTO progress (member_id) VALUES (?)').bind(id),
       ]);
       // Un nouvel habitant peut recevoir des tâches : on régénère la semaine en cours (à partir d'aujourd'hui)
-      await generateWeek(env, weekStart(today()), today());
+      await regenerateAhead(env, today());
       notify();
       return json(await buildState(env));
     }
@@ -353,7 +363,7 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
           db.prepare('UPDATE task_defs SET fixed_assignee = NULL WHERE fixed_assignee = ?').bind(member.id),
           db.prepare('DELETE FROM members WHERE id = ?').bind(member.id),
         ]);
-        await generateWeek(env, weekStart(today()), today());
+        await regenerateAhead(env, today());
       } else {
         const body = await readBody(request);
         const name = ((body.name as string) ?? member.name).trim() || member.name;
@@ -381,7 +391,7 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
               .bind(member.id, today(), awayUntil)
               .run();
           }
-          await generateWeek(env, weekStart(today()), today());
+          await regenerateAhead(env, today());
         }
       }
       notify();
@@ -819,7 +829,7 @@ export async function handleApi(request: Request, env: Env, ctx: ExecutionContex
         }
       }
       if (stmts.length) await db.batch(stmts);
-      if (pauseChanged) await generateWeek(env, weekStart(today()), today());
+      if (pauseChanged) await regenerateAhead(env, today());
       notify();
       return json(await buildState(env));
     }

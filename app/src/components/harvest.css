@@ -68,3 +68,45 @@
 .harvest-hint {
   margin: 2px 0 0;
 }
+
+.harvest-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.harvest-goal {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  background: var(--parchemin-2);
+}
+
+.harvest-goal.reached {
+  background: #fdf0d6;
+}
+
+.harvest-goal-bar {
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--blanc);
+  overflow: hidden;
+}
+
+.harvest-goal-bar div {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--miel), var(--argile));
+  transition: width 0.7s ease;
+}
+
+.harvest-setgoal {
+  width: 100%;
+  min-height: 44px;
+  margin: 0 0 12px;
+  border-radius: var(--radius-s);
+  border: 2px dashed var(--miel);
+  color: var(--miel-fonce);
+  font-family: var(--font-display);
+}

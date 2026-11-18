@@ -14,7 +14,7 @@ export function GameInfo({ onClose }: { onClose: () => void }) {
             famille.
           </li>
           <li>
-            <strong>C'est collectif</strong> : peu importe qui les gagne, ils s'additionnent et font monter le village
+            <strong>C'est collectif</strong> : peu importe qui les gagne, elles s'additionnent et font monter le village
             de niveau.
           </li>
           <li>
@@ -24,6 +24,14 @@ export function GameInfo({ onClose }: { onClose: () => void }) {
           <li>
             <strong>La récolte de la semaine</strong> montre ce que chacun a apporté. C'est fait pour s'entraider, pas
             pour se comparer.
+          </li>
+          <li>
+            <strong>Entraide</strong> : dis 💛 merci pour une tâche faite, confie ou échange une tâche, et prends les
+            tâches « 🙋 à prendre ».
+          </li>
+          <li>
+            Les enfants gardent leurs noisettes dans une <strong>tirelire</strong> pour obtenir les récompenses choisies
+            par les parents.
           </li>
           <li>
             Les <strong>zones du village</strong> se ternissent doucement si on oublie leurs tâches, et brillent dès

@@ -1,6 +1,6 @@
 # Le Village 🏡🦊
 
-Application familiale ludique de gestion des tâches ménagères. Votre foyer devient un petit village de créatures : chaque tâche accomplie (jardin, piscine, lessive, cuisine, courses, rangement) fait vivre sa zone du village, rapporte des noisettes et fait monter le village de niveau, avec des embellissements permanents à débloquer. Coopératif, bienveillant, pensé pour deux adultes et un enfant de 3-5 ans.
+Application familiale ludique de gestion des tâches ménagères. Votre foyer devient un petit village de créatures : chaque tâche accomplie (jardin, piscine, lessive, cuisine, courses, rangement) fait vivre sa zone du village, rapporte des noisettes et fait monter le village de niveau, avec des embellissements permanents à débloquer. Coopératif, bienveillant, pour tous les foyers (couple, parent solo, colocation, famille nombreuse) et tous les âges (adultes, ados, petits).
 
 **Production** : https://le-village.boka-reunion.workers.dev
 
@@ -17,7 +17,12 @@ Application familiale ludique de gestion des tâches ménagères. Votre foyer de
 - Liste de courses partagée temps réel avec suggestions apprises, mode magasin hors ligne
 - Mode enfant sans texte avec validation parentale et confettis
 - Mode tableau de bord pour tablette murale (opt-in, mémorisé par appareil)
-- Balançoire d'équilibre et statistiques positives (semaine + 4 semaines)
+- Récolte de la semaine avec message d'entraide équitable (basé sur le retard réel, jamais avant jeudi) et objectif de famille avec récompense
+- Foyer v2 : rôle ado (tâches légères, part réduite), absences et jours chargés, mode vacances, tâches « à prendre » (premier qui la prend), moment de la journée et rappel à heure précise
+- Entraide : « merci » 💛 sur les tâches des autres, confier une tâche (avec annulation), échanges de tâches acceptés ou refusés
+- Missions en retard regroupées dans « Aujourd'hui », semaine prochaine visible et ajustable dès le dimanche soir, bilan de la semaine
+- Mode enfant par enfant, lecture à voix haute, code parent (validation, sortie, récompenses), tirelire de noisettes et récompenses définies par les parents
+- Courses : rayons boulangerie, surgelés, bébé, animaux ; terminer les courses coche la tâche « courses »
 - Rappels doux (résumé matin, rappel soir) en Web Push
 - PWA installable, gratuite, sans compte ni mot de passe (token familial)
 

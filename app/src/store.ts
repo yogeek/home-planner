@@ -3,7 +3,7 @@ import { api, getMemberId, setMemberId } from './api';
 import { enqueue, flushQueue, loadCache, saveCache } from './offline';
 import { catInfo } from './zones';
 import { guessAisle } from '@shared/aisles';
-import type { AppState, Occurrence, ShoppingItem, Zone } from './types';
+import type { AppState, Moment, Occurrence, Role, ShoppingItem, Zone } from './types';
 
 export type TabId = 'village' | 'jour' | 'semaine' | 'courses' | 'plus';
 
@@ -15,11 +15,20 @@ export interface Celebration {
   ts: number;
 }
 
+export interface ToastAction {
+  label: string;
+  run: () => void;
+}
+
 interface Store {
   state: AppState | null;
   memberId: string | null;
   tab: TabId;
-  childMode: boolean;
+  /** Enfant affiché en mode enfant (id), null hors mode enfant */
+  childMode: string | null;
+  /** Fin de journée : toutes mes missions du jour sont faites (déclenche la fête sur le village) */
+  dayDone: { ts: number; gained: number } | null;
+  clearDayDone: () => void;
   /** Mode tableau du foyer (tablette murale), mémorisé sur l'appareil */
   dashboard: boolean;
   setDashboard: (v: boolean) => void;
@@ -31,16 +40,27 @@ interface Store {
   celebration: Celebration | null;
 
   setTab: (t: TabId) => void;
-  setChildMode: (v: boolean) => void;
+  setChildMode: (childId: string | null) => void;
   chooseMember: (id: string) => void;
   refresh: () => Promise<void>;
   applyState: (s: AppState) => void;
 
   doneOccurrence: (occ: Occurrence, validatedBy?: string) => Promise<void>;
   undoOccurrence: (occ: Occurrence) => Promise<void>;
-  moveOccurrence: (occ: Occurrence, changes: { date?: string; assignee?: string }) => Promise<void>;
-  addOccurrence: (data: { title: string; zone: string; weight?: number; date?: string; assignee?: string; assignees?: string[] }) => Promise<void>;
-  editOccurrence: (occ: Occurrence, changes: { title?: string; zone?: string; weight?: number }) => Promise<void>;
+  moveOccurrence: (occ: Occurrence, changes: { date?: string; assignee?: string | null; handedBy?: string | null }) => Promise<void>;
+  addOccurrence: (data: {
+    title: string;
+    zone: string;
+    weight?: number;
+    date?: string;
+    assignee?: string;
+    assignees?: string[];
+    pool?: boolean;
+    moment?: Moment | null;
+  }) => Promise<void>;
+  editOccurrence: (occ: Occurrence, changes: { title?: string; zone?: string; weight?: number; moment?: Moment | null }) => Promise<void>;
+  /** Appel API générique qui applique l'état renvoyé ; false en cas d'erreur (déjà affichée) */
+  call: (path: string, body?: Record<string, unknown>, method?: string) => Promise<boolean>;
   deleteOccurrence: (occ: Occurrence) => Promise<void>;
 
   addShoppingItem: (label: string, aisle?: string) => Promise<void>;
@@ -49,12 +69,15 @@ interface Store {
   updateShoppingItem: (item: ShoppingItem, changes: { aisle?: string; qty?: number }) => Promise<void>;
   checkoutShopping: () => Promise<void>;
 
-  addMember: (data: { name: string; creature: string; role: 'adult' | 'child' }) => Promise<void>;
-  updateMember: (id: string, data: { name?: string; creature?: string; role?: 'adult' | 'child' }) => Promise<void>;
+  addMember: (data: { name: string; creature: string; role: Role }) => Promise<void>;
+  updateMember: (
+    id: string,
+    data: { name?: string; creature?: string; role?: Role; awayUntil?: string | null; busyDays?: number[] },
+  ) => Promise<void>;
   removeMember: (id: string) => Promise<void>;
 
-  info: string | null;
-  notifyInfo: (msg: string) => void;
+  info: { msg: string; action?: ToastAction } | null;
+  notifyInfo: (msg: string, action?: ToastAction) => void;
   clearError: () => void;
 }
 
@@ -91,7 +114,9 @@ export const useStore = create<Store>((set, get) => ({
   state: null,
   memberId: getMemberId(),
   tab: 'village',
-  childMode: false,
+  childMode: null,
+  dayDone: null,
+  clearDayDone: () => set({ dayDone: null }),
   dashboard: localStorage.getItem('village.dashboard') === '1',
   loading: false,
   error: null,
@@ -114,7 +139,8 @@ export const useStore = create<Store>((set, get) => ({
 
   chooseMember: (id) => {
     setMemberId(id);
-    set({ memberId: id });
+    // Nouveau profil : on arrive sur ses missions du jour
+    set(id ? { memberId: id, tab: 'jour' } : { memberId: id });
   },
 
   applyState: (s) => {
@@ -143,11 +169,14 @@ export const useStore = create<Store>((set, get) => ({
   doneOccurrence: async (occ, validatedBy) => {
     const { state, memberId } = get();
     if (!state) return;
-    // Optimiste : marque fait localement + célébration immédiate
+    // Optimiste : marque fait localement + célébration immédiate (une tâche « à prendre » revient à qui la fait)
+    const mark = (o: Occurrence) =>
+      o.id === occ.id ? { ...o, status: 'done' as const, doneBy: memberId, assignee: o.assignee ?? memberId } : o;
     set({
       state: {
         ...state,
-        week: state.week.map((o) => (o.id === occ.id ? { ...o, status: 'done' as const, doneBy: memberId } : o)),
+        week: state.week.map(mark),
+        overdue: state.overdue.map(mark),
       },
       celebration: {
         zone: catInfo(state.categories, occ.zone).sceneZone,
@@ -157,6 +186,11 @@ export const useStore = create<Store>((set, get) => ({
         ts: Date.now(),
       },
     });
+    // Dernière mission du jour pour moi : petite fête sur le village
+    const mineToday = get().state!.week.filter((o) => o.date === state.today && o.assignee === memberId);
+    if (occ.date === state.today && (occ.assignee ?? memberId) === memberId && !validatedBy && mineToday.every((o) => o.status === 'done')) {
+      set({ dayDone: { ts: Date.now(), gained: mineToday.reduce((n, o) => n + o.weight, 0) } });
+    }
     try {
       const s = await api(`/occurrences/${occ.id}/done`, { body: { byMemberId: memberId, validatedBy } });
       set({ state: s });
@@ -178,8 +212,9 @@ export const useStore = create<Store>((set, get) => ({
   moveOccurrence: async (occ, changes) => {
     const { state } = get();
     if (state) {
+      const patch = (o: Occurrence) => (o.id === occ.id ? { ...o, ...changes } : o);
       set({
-        state: { ...state, week: state.week.map((o) => (o.id === occ.id ? { ...o, ...changes } : o)) },
+        state: { ...state, week: state.week.map(patch), overdue: state.overdue.map(patch), nextWeek: state.nextWeek.map(patch) },
       });
     }
     try {
@@ -212,7 +247,8 @@ export const useStore = create<Store>((set, get) => ({
   deleteOccurrence: async (occ) => {
     const { state } = get();
     if (state) {
-      set({ state: { ...state, week: state.week.filter((o) => o.id !== occ.id) } });
+      const keep = (o: Occurrence) => o.id !== occ.id;
+      set({ state: { ...state, week: state.week.filter(keep), overdue: state.overdue.filter(keep), nextWeek: state.nextWeek.filter(keep) } });
     }
     try {
       const s = await api(`/occurrences/${occ.id}`, { method: 'DELETE', body: {} });
@@ -301,7 +337,21 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   checkoutShopping: async () => {
-    await shoppingMutation(get, set, (items) => items.filter((i) => i.status !== 'checked'), '/shopping/checkout', {});
+    await shoppingMutation(get, set, (items) => items.filter((i) => i.status !== 'checked'), '/shopping/checkout', {
+      byMemberId: get().memberId,
+    });
+  },
+
+  call: async (path, body, method) => {
+    try {
+      const s = await api(path, { body: body ?? {}, method });
+      set({ state: s });
+      saveCache(s);
+      return true;
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Erreur' });
+      return false;
+    }
   },
 
   addMember: async (data) => {
@@ -327,11 +377,12 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   info: null,
-  notifyInfo: (msg) => {
-    set({ info: msg });
+  notifyInfo: (msg, action) => {
+    const info = { msg, action };
+    set({ info });
     setTimeout(() => {
-      if (useStore.getState().info === msg) set({ info: null });
-    }, 2600);
+      if (useStore.getState().info === info) set({ info: null });
+    }, action ? 5000 : 2600);
   },
 
   clearError: () => set({ error: null }),

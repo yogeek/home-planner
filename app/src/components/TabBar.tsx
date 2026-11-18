@@ -14,8 +14,11 @@ export function TabBar() {
   const state = useStore((s) => s.state);
   const memberId = useStore((s) => s.memberId);
 
-  const todayCount =
-    state?.week.filter((o) => o.date === state.today && o.assignee === memberId && o.status === 'todo').length ?? 0;
+  const todayCount = state
+    ? [...state.week.filter((o) => o.date === state.today), ...state.overdue].filter(
+        (o) => o.assignee === memberId && o.status === 'todo',
+      ).length + state.swaps.filter((s) => s.toMember === memberId).length
+    : 0;
   const shoppingCount = state?.shopping.filter((i) => i.status === 'open').length ?? 0;
 
   return (

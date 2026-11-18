@@ -8,6 +8,12 @@ import type { AppState } from '../types';
 import { pushSupported, subscribePush } from '../push';
 import { TaskSettings } from './TaskSettings';
 import { MembersManager } from './MembersManager';
+import { GoalSheet } from '../components/GoalSheet';
+import { memberColor } from '../components/Harvest';
+import { PinPad } from '../components/PinPad';
+import { timeOfDay } from '../components/VillageScene';
+import { shortDay } from '../zones';
+import { addDays } from '@shared/dates';
 import './more.css';
 
 export function More() {
@@ -23,10 +29,17 @@ export function More() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [goalOpen, setGoalOpen] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [rewardsOpen, setRewardsOpen] = useState(false);
+  const call = useStore((s) => s.call);
 
   if (!state || !me) return null;
   const members = state.members;
-  const child = members.find((m) => m.role === 'child');
+  const children = members.filter((m) => m.role === 'child');
+  const time = timeOfDay(new Date(state.now));
+  const title = time === 'aube' ? 'Le coin du matin' : time === 'jour' ? 'Le coin de la famille' : 'Le coin du soir';
 
   const weekDone = state.week
     .filter((o) => o.status === 'done')
@@ -69,7 +82,7 @@ export function More() {
   return (
     <div className="screen more-screen">
       <div className="title-row">
-        <h2>Le coin du soir</h2>
+        <h2>{title}</h2>
       </div>
 
       {/* Qui utilise l'app (changement de profil, mode enfant) */}
@@ -85,11 +98,11 @@ export function More() {
           <button className="btn" onClick={() => chooseMember('')}>
             🔄 Changer de personne
           </button>
-          {child && (
-            <button className="btn secondary" onClick={() => setChildMode(true)}>
-              🧸 Mode {child.name}
+          {children.map((c) => (
+            <button key={c.id} className="btn secondary" onClick={() => setChildMode(c.id)}>
+              🧸 Mode {c.name}
             </button>
-          )}
+          ))}
         </div>
       </div>
 
@@ -108,7 +121,7 @@ export function More() {
               <div key={a.id} className="bal-row">
                 <Creature species={a.creature} size={32} />
                 <div className="bal-bar">
-                  <div className="bal-fill" style={{ width: `${Math.max(4, (v / maxG) * 100)}%`, background: a.color }} />
+                  <div className="bal-fill" style={{ width: `${Math.max(4, (v / maxG) * 100)}%`, background: memberColor(members, a.id) }} />
                 </div>
                 <span className="bal-num">{v} 🌰</span>
               </div>
@@ -142,18 +155,60 @@ export function More() {
         <h3>📜 Le journal du village</h3>
         {weekDone.length === 0 && <p className="muted">Rien encore cette semaine. La première mission lance l'histoire !</p>}
         <ul className="journal">
-          {weekDone.slice(0, 12).map((o) => {
+          {weekDone.slice(0, 15).map((o) => {
             const who = state.members.find((m) => m.id === o.assignee);
+            const hearts = state.thanks.filter((t) => t.occurrenceId === o.id);
+            const thanked = hearts.some((t) => t.from === me.id);
             return (
               <li key={o.id}>
                 {who && <Creature species={who.creature} size={22} />}
-                <span>
+                <span className="journal-text">
                   <strong>{who?.name}</strong> · {o.title} {catInfo(state.categories, o.zone).emoji}
+                  {hearts.length > 0 && <span className="journal-hearts"> {'💛'.repeat(Math.min(hearts.length, 5))}</span>}
                 </span>
+                {o.assignee !== me.id && (
+                  <button
+                    className={`journal-thanks ${thanked ? 'on' : ''}`}
+                    disabled={thanked}
+                    onClick={() => void call(`/occurrences/${o.id}/thanks`, { from: me.id })}
+                    aria-label={thanked ? `Merci envoyé à ${who?.name}` : `Dire merci à ${who?.name} pour ${o.title}`}
+                  >
+                    {thanked ? '💛' : 'Merci'}
+                  </button>
+                )}
               </li>
             );
           })}
         </ul>
+      </div>
+
+      {/* La vie de famille : objectif, vacances, récompenses, code parent */}
+      <div className="card more-card">
+        <h3>👪 Vie de famille</h3>
+        <div className="family-rows">
+          <button className="family-row" onClick={() => setGoalOpen(true)}>
+            <span>🎯 Objectif de la semaine</span>
+            <span className="muted">
+              {state.settings.weeklyGoal ? `${state.settings.weeklyGoal} 🌰${state.settings.goalReward ? ` → ${state.settings.goalReward}` : ''}` : 'aucun'}
+            </span>
+          </button>
+          <button className="family-row" onClick={() => setPauseOpen(true)}>
+            <span>🏖️ Mode vacances</span>
+            <span className="muted">
+              {state.settings.pauseUntil && state.settings.pauseUntil >= state.today
+                ? `jusqu'au ${shortDay(state.settings.pauseUntil)}`
+                : 'désactivé'}
+            </span>
+          </button>
+          <button className="family-row" onClick={() => setRewardsOpen(true)}>
+            <span>🎁 Récompenses des enfants</span>
+            <span className="muted">{state.rewards.length ? `${state.rewards.length} récompense${state.rewards.length > 1 ? 's' : ''}` : 'à créer'}</span>
+          </button>
+          <button className="family-row" onClick={() => setPinOpen(true)}>
+            <span>🔒 Code parent</span>
+            <span className="muted">{state.settings.hasPin ? 'activé' : 'aucun'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Confort de lecture */}
@@ -211,6 +266,10 @@ export function More() {
       {settingsOpen && <TaskSettings onClose={() => setSettingsOpen(false)} />}
       {membersOpen && <MembersManager onClose={() => setMembersOpen(false)} />}
       {resetOpen && <ResetSheet onClose={() => setResetOpen(false)} />}
+      {goalOpen && <GoalSheet onClose={() => setGoalOpen(false)} />}
+      {pauseOpen && <PauseSheet onClose={() => setPauseOpen(false)} />}
+      {pinOpen && <PinSettings onClose={() => setPinOpen(false)} />}
+      {rewardsOpen && <RewardsSheet onClose={() => setRewardsOpen(false)} />}
     </div>
   );
 }
@@ -275,6 +334,201 @@ function ResetSheet({ onClose }: { onClose: () => void }) {
         </button>
         <button className="btn secondary sheet-close" onClick={onClose}>
           Annuler
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Mode vacances : plus de tâches récurrentes ni de rappels, les zones ne se ternissent pas */
+function PauseSheet({ onClose }: { onClose: () => void }) {
+  useEscape(onClose);
+  const state = useStore((s) => s.state);
+  const call = useStore((s) => s.call);
+  const notifyInfo = useStore((s) => s.notifyInfo);
+  const [until, setUntil] = useState(state?.settings.pauseUntil ?? '');
+  if (!state) return null;
+  const active = !!state.settings.pauseUntil && state.settings.pauseUntil >= state.today;
+
+  async function save(v: string | null) {
+    if (await call('/settings', { pauseUntil: v }, 'PUT')) {
+      notifyInfo(v ? `Bonnes vacances ! 🏖️ Jusqu'au ${shortDay(v)}` : 'Le village reprend vie 🌱');
+      onClose();
+    }
+  }
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+        <h3>🏖️ Mode vacances</h3>
+        <p className="muted">
+          Toute la famille part ? Pendant les vacances, plus de tâches récurrentes ni de rappels, et les zones du village
+          ne se ternissent pas. Les tâches ponctuelles restent. Pour une seule personne absente, passe plutôt par « Gérer
+          les habitants ».
+        </p>
+        <div className="move-row wrap">
+          {[
+            { label: 'Ce week-end', v: addDays(state.today, Math.max(1, 6 - ((new Date(state.today + 'T12:00:00Z').getUTCDay() + 6) % 7))) },
+            { label: '1 semaine', v: addDays(state.today, 6) },
+            { label: '2 semaines', v: addDays(state.today, 13) },
+            { label: '3 semaines', v: addDays(state.today, 20) },
+          ].map((o) => (
+            <button key={o.label} aria-pressed={until === o.v} className={`move-chip ${until === o.v ? 'active' : ''}`} onClick={() => setUntil(o.v)}>
+              {o.label}
+            </button>
+          ))}
+          <label className="move-chip tset-date">
+            jusqu'au
+            <input type="date" min={state.today} value={until} onChange={(e) => setUntil(e.target.value)} />
+          </label>
+        </div>
+        <button className="btn sheet-close" disabled={!until} onClick={() => void save(until)}>
+          {active ? 'Modifier les vacances' : 'Partir en vacances'}
+        </button>
+        {active && (
+          <button className="btn secondary sheet-close" onClick={() => void save(null)}>
+            Nous sommes rentrés !
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Code parent : protège la validation des missions, la sortie du mode enfant et les récompenses */
+function PinSettings({ onClose }: { onClose: () => void }) {
+  useEscape(onClose);
+  const state = useStore((s) => s.state);
+  const call = useStore((s) => s.call);
+  const notifyInfo = useStore((s) => s.notifyInfo);
+  const [oldPin, setOldPin] = useState<string | null>(state?.settings.hasPin ? null : '');
+  const [pin, setPin] = useState('');
+  if (!state) return null;
+
+  if (oldPin === null) {
+    return <PinPad title="Code actuel" onClose={onClose} onSuccess={(p) => setOldPin(p)} />;
+  }
+
+  async function save(newPin: string) {
+    if (await call('/pin', { pin: newPin, oldPin }, 'POST')) {
+      notifyInfo(newPin ? 'Code parent enregistré 🔒' : 'Code parent retiré');
+      onClose();
+    }
+  }
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+        <h3>🔒 Code parent</h3>
+        <p className="muted">
+          4 chiffres que les enfants ne connaissent pas. Il sera demandé pour valider une mission enfant, sortir du mode
+          enfant et offrir une récompense.
+        </p>
+        <input
+          className="ob-input pin-input"
+          inputMode="numeric"
+          autoComplete="off"
+          maxLength={4}
+          placeholder="• • • •"
+          value={pin}
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+          aria-label="Nouveau code à 4 chiffres"
+        />
+        <button className="btn sheet-close" disabled={pin.length !== 4} onClick={() => void save(pin)}>
+          Enregistrer le code
+        </button>
+        {state.settings.hasPin && (
+          <button className="btn secondary sheet-close" onClick={() => void save('')}>
+            Retirer le code
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Récompenses que les enfants obtiennent avec leurs noisettes */
+function RewardsSheet({ onClose }: { onClose: () => void }) {
+  useEscape(onClose);
+  const state = useStore((s) => s.state);
+  const call = useStore((s) => s.call);
+  const [title, setTitle] = useState('');
+  const [emoji, setEmoji] = useState('🎁');
+  const [cost, setCost] = useState(20);
+  if (!state) return null;
+  const young = state.members.filter((m) => m.role !== 'adult');
+
+  async function add() {
+    if (!title.trim()) return;
+    if (await call('/rewards', { title: title.trim(), emoji, cost })) {
+      setTitle('');
+    }
+  }
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+        <h3>🎁 Les récompenses</h3>
+        <p className="muted">
+          Les enfants et ados dépensent les noisettes qu'ils ont gagnées. Elles ne sont pas retirées du village : c'est
+          une tirelire à part.
+        </p>
+        {young.length > 0 && (
+          <p className="muted">
+            Tirelires :{' '}
+            {young.map((m) => `${m.name} ${(state.stars[m.id]?.earned ?? 0) - (state.stars[m.id]?.spent ?? 0)} 🌰`).join(' · ')}
+          </p>
+        )}
+        <ul className="reward-list">
+          {state.rewards.map((r) => (
+            <li key={r.id}>
+              <span className="reward-emoji">{r.emoji}</span>
+              <span className="reward-title">{r.title}</span>
+              <span className="muted">{r.cost} 🌰</span>
+              <button className="reward-del" onClick={() => void call(`/rewards/${r.id}`, {}, 'DELETE')} aria-label={`Supprimer ${r.title}`}>
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="move-row wrap">
+          {['🎁', '🛝', '🍦', '🎬', '📚', '🎮', '🏖️', '🍕'].map((e) => (
+            <button key={e} aria-pressed={emoji === e} className={`move-chip ${emoji === e ? 'active' : ''}`} onClick={() => setEmoji(e)}>
+              {e}
+            </button>
+          ))}
+        </div>
+        <input
+          className="ob-input"
+          placeholder="ex : sortie au parc, une glace, choisir le film"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={60}
+        />
+        <div className="move-row wrap">
+          {[10, 20, 30, 50, 100].map((c) => (
+            <button key={c} aria-pressed={cost === c} className={`move-chip ${cost === c ? 'active' : ''}`} onClick={() => setCost(c)}>
+              {c} 🌰
+            </button>
+          ))}
+        </div>
+        <button className="btn sheet-close" disabled={!title.trim()} onClick={() => void add()}>
+          Ajouter la récompense
+        </button>
+        {state.claims.length > 0 && (
+          <p className="muted">
+            Dernières obtenues :{' '}
+            {state.claims
+              .slice(0, 5)
+              .map((c) => `${state.members.find((m) => m.id === c.memberId)?.name ?? '?'} ${c.emoji} ${c.title}`)
+              .join(' · ')}
+          </p>
+        )}
+        <button className="btn secondary sheet-close" onClick={onClose}>
+          Fermer
         </button>
       </div>
     </div>

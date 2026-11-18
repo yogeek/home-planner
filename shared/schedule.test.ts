@@ -47,7 +47,17 @@ describe('expandWeek', () => {
 
   it('timesPerWeek répartit uniformément sur la semaine', () => {
     const slots = expandWeek([def({ id: 'lessive', recurrence: { timesPerWeek: 3 } })], WEEK, 'winter');
-    expect(slots.map((s) => dayOfWeek(s.date))).toEqual([0, 2, 4]);
+    const days = slots.map((s) => dayOfWeek(s.date)).sort();
+    expect(new Set(days).size).toBe(3);
+    // espacées d'au moins 2 jours (en tenant compte du passage dimanche → lundi)
+    const gaps = days.map((d, i) => (i === 0 ? d + 7 - days[days.length - 1] : d - days[i - 1]));
+    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(2);
+  });
+
+  it('les tâches hebdomadaires ne tombent pas toutes le lundi', () => {
+    const defs = Array.from({ length: 8 }, (_, i) => def({ id: `hebdo-${i}`, recurrence: { timesPerWeek: 1 } }));
+    const days = new Set(expandWeek(defs, WEEK, 'winter').map((s) => dayOfWeek(s.date)));
+    expect(days.size).toBeGreaterThanOrEqual(3);
   });
 
   it('timesPerWeek 7 = tous les jours', () => {

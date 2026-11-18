@@ -2,21 +2,22 @@ import { useState } from 'react';
 import { api } from '../api';
 import { useStore } from '../store';
 import { Creature, SPECIES } from '../components/Creature';
-import type { AppState } from '../types';
+import type { AppState, Role } from '../types';
+import { ROLE_META } from '../zones';
 import './onboarding.css';
 
 interface Draft {
   key: number;
   name: string;
   creature: string;
-  role: 'adult' | 'child';
+  role: Role;
 }
 
 let seq = 1;
 function nextCreature(used: string[]): string {
   return SPECIES.find((sp) => !used.includes(sp)) ?? SPECIES[used.length % SPECIES.length];
 }
-function makeDraft(role: 'adult' | 'child', used: string[]): Draft {
+function makeDraft(role: Role, used: string[]): Draft {
   return { key: seq++, name: '', creature: nextCreature(used), role };
 }
 
@@ -75,11 +76,13 @@ export function Onboarding() {
   const [drafts, setDrafts] = useState<Draft[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<'members' | 'home'>('members');
+  const [home, setHome] = useState({ garden: true, pool: false, pet: false });
 
   const update = (key: number, patch: Partial<Draft>) =>
     setDrafts((d) => d?.map((m) => (m.key === key ? { ...m, ...patch } : m)) ?? null);
   const remove = (key: number) => setDrafts((d) => d?.filter((m) => m.key !== key) ?? null);
-  const add = (role: 'adult' | 'child') =>
+  const add = (role: Role) =>
     setDrafts((d) => [...(d ?? []), makeDraft(role, (d ?? []).map((m) => m.creature))]);
 
   const adults = drafts?.filter((m) => m.role === 'adult') ?? [];
@@ -91,7 +94,7 @@ export function Onboarding() {
     setError(null);
     try {
       const members = drafts.map((m) => ({ name: m.name.trim(), creature: m.creature, role: m.role }));
-      const s = await api<AppState>('/onboard', { body: { members } });
+      const s = await api<AppState>('/onboard', { body: { members, home } });
       applyState(s);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur');
@@ -130,6 +133,51 @@ export function Onboarding() {
     );
   }
 
+  // Écran 2 : la maison (pour ne proposer que les tâches qui ont du sens)
+  if (step === 'home') {
+    const opts = [
+      { key: 'garden', emoji: '🌿', label: 'Un jardin', desc: 'pelouse à tondre, désherbage' },
+      { key: 'pool', emoji: '💧', label: 'Une piscine', desc: 'pH, filtre, robot' },
+      { key: 'pet', emoji: '🐾', label: 'Un animal', desc: 'nourrir, litière ou promenade' },
+    ] as const;
+    return (
+      <div className="onboarding">
+        <div className="ob-panel ob-builder">
+          <h2>Et la maison ?</h2>
+          <p className="ob-label">On prépare les tâches qui vous concernent. Vous pourrez tout ajuster ensuite.</p>
+          <div className="ob-home">
+            {opts.map((o) => (
+              <button
+                key={o.key}
+                className={`ob-home-opt ${home[o.key] ? 'active' : ''}`}
+                aria-pressed={home[o.key]}
+                onClick={() => setHome((h) => ({ ...h, [o.key]: !h[o.key] }))}
+              >
+                <span className="ob-profil-emoji" aria-hidden>
+                  {o.emoji}
+                </span>
+                <span className="ob-profil-label">{o.label}</span>
+                <span className="ob-profil-desc">{o.desc}</span>
+                <span className="ob-home-check" aria-hidden>
+                  {home[o.key] ? '✓ oui' : 'non'}
+                </span>
+              </button>
+            ))}
+          </div>
+          {error && <p className="ob-error">{error}</p>}
+          <div className="ob-nav">
+            <button className="btn ghost" onClick={() => setStep('members')}>
+              Retour
+            </button>
+            <button className="btn" disabled={busy} onClick={found}>
+              {busy ? 'Fondation...' : 'Créer le village !'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Écran 1 : composer les habitants
   return (
     <div className="onboarding">
@@ -143,29 +191,28 @@ export function Onboarding() {
               <div className="ob-member-head">
                 <input
                   className="ob-input ob-member-name"
-                  placeholder={m.role === 'child' ? 'Prénom (enfant)' : 'Prénom'}
+                  placeholder={m.role === 'child' ? 'Prénom (enfant)' : m.role === 'teen' ? 'Prénom (ado)' : 'Prénom'}
+                  aria-label="Prénom"
                   value={m.name}
                   onChange={(e) => update(m.key, { name: e.target.value })}
                 />
                 {drafts.length > 1 && (
-                  <button className="ob-remove" onClick={() => remove(m.key)} aria-label="Retirer">
+                  <button className="ob-remove" onClick={() => remove(m.key)} aria-label={`Retirer ${m.name || 'cet habitant'}`}>
                     ✕
                   </button>
                 )}
               </div>
               <div className="ob-role-row">
-                <button
-                  className={`ob-role ${m.role === 'adult' ? 'active' : ''}`}
-                  onClick={() => update(m.key, { role: 'adult' })}
-                >
-                  Adulte
-                </button>
-                <button
-                  className={`ob-role ${m.role === 'child' ? 'active' : ''}`}
-                  onClick={() => update(m.key, { role: 'child' })}
-                >
-                  🧸 Enfant
-                </button>
+                {(['adult', 'teen', 'child'] as const).map((r) => (
+                  <button
+                    key={r}
+                    className={`ob-role ${m.role === r ? 'active' : ''}`}
+                    aria-pressed={m.role === r}
+                    onClick={() => update(m.key, { role: r })}
+                  >
+                    {ROLE_META[r].label}
+                  </button>
+                ))}
               </div>
               <div className="ob-creature-strip">
                 {SPECIES.map((sp) => (
@@ -188,6 +235,9 @@ export function Onboarding() {
           <button className="btn secondary" onClick={() => add('adult')}>
             + Un adulte
           </button>
+          <button className="btn secondary" onClick={() => add('teen')}>
+            + 🎧 Un ado
+          </button>
           <button className="btn secondary" onClick={() => add('child')}>
             + 🧸 Un enfant
           </button>
@@ -200,8 +250,8 @@ export function Onboarding() {
           <button className="btn ghost" onClick={() => setDrafts(null)}>
             Retour
           </button>
-          <button className="btn" disabled={!canCreate || busy} onClick={found}>
-            {busy ? 'Fondation...' : 'Créer le village !'}
+          <button className="btn" disabled={!canCreate} onClick={() => setStep('home')}>
+            Suivant
           </button>
         </div>
       </div>

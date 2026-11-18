@@ -34,7 +34,9 @@ export function expandWeek(defs: TaskDef[], weekStart: string, season: 'summer' 
       for (const day of daysOfWeek) slots.push(toSlot(addDays(weekStart, day)));
     } else if (timesPerWeek && timesPerWeek >= 1) {
       const n = Math.min(7, Math.round(timesPerWeek));
-      for (let i = 0; i < n; i++) slots.push(toSlot(addDays(weekStart, Math.floor((i * 7) / n))));
+      // Décalage stable propre à chaque tâche : les tâches hebdomadaires se répartissent sur la semaine
+      const offset = n < 7 ? hash(def.id) % 7 : 0;
+      for (let i = 0; i < n; i++) slots.push(toSlot(addDays(weekStart, (Math.floor((i * 7) / n) + offset) % 7)));
     } else if (timesPerWeek && timesPerWeek > 0) {
       const interval = Math.round(1 / timesPerWeek);
       if (isoWeek(weekStart) % interval === hash(def.id) % interval) {

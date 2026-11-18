@@ -1,41 +1,54 @@
-import type { Member } from '../types';
+import type { Member, Occurrence } from '../types';
+import { harvestMessage } from '@shared/harvest';
+import { MEMBER_PALETTE } from '../zones';
 import { Creature } from './Creature';
 import './harvest.css';
 
-/** Message d'entraide bienveillant selon les contributions des adultes */
-export function harvestMessage(members: Member[], weekGlands: Record<string, number>): string {
-  const adults = members.filter((m) => m.role === 'adult');
-  const total = members.reduce((s, m) => s + (weekGlands[m.id] ?? 0), 0);
-  if (total === 0) return 'La semaine commence : première mission cochée, première noisette ! 🌱';
-
-  if (adults.length <= 1) {
-    const a = adults[0];
-    const g = a ? (weekGlands[a.id] ?? 0) : 0;
-    const kids = members.filter((m) => m.role === 'child' && (weekGlands[m.id] ?? 0) > 0);
-    const kidNote = kids.length ? `, et ${kids.map((k) => k.name).join(' et ')} donne un coup de main 🧸` : '';
-    return `Bravo ${a?.name ?? ''}, ${g} 🌰 cette semaine${kidNote} !`;
-  }
-
-  const sorted = adults.map((a) => ({ a, g: weekGlands[a.id] ?? 0 })).sort((x, y) => y.g - x.g);
-  const top = sorted[0];
-  const low = sorted[sorted.length - 1];
-  const mean = sorted.reduce((s, x) => s + x.g, 0) / sorted.length;
-  if (top.g - low.g >= 5 && top.g >= mean * 1.4) {
-    return `💛 ${top.a.name} a bien porté cette semaine, un coup de main lui ferait plaisir`;
-  }
-  return "Bel élan collectif, bravo l'équipe ! 💚";
+/** Couleur stable et bien distincte de chaque habitant (selon son ordre dans le foyer) */
+export function memberColor(members: Member[], id: string): string {
+  const i = members.findIndex((m) => m.id === id);
+  return MEMBER_PALETTE[(i < 0 ? 0 : i) % MEMBER_PALETTE.length];
 }
 
-/** La récolte commune : la contribution de chacun dans une même semaine partagée */
-export function Harvest({ members, weekGlands }: { members: Member[]; weekGlands: Record<string, number> }) {
+interface Props {
+  members: Member[];
+  week: Occurrence[];
+  today: string;
+  weekGlands: Record<string, number>;
+  goal: number | null;
+  goalReward: string | null;
+  onSetGoal?: () => void;
+}
+
+/** La récolte commune : la contribution de chacun dans une même semaine partagée, et l'objectif de la famille */
+export function Harvest({ members, week, today, weekGlands, goal, goalReward, onSetGoal }: Props) {
   const contribs = members.map((m) => ({ m, g: weekGlands[m.id] ?? 0 }));
   const total = contribs.reduce((s, c) => s + c.g, 0);
+  const reached = goal != null && total >= goal;
 
   return (
     <div className="harvest">
       <p className="harvest-title display">🌳 Notre semaine au village</p>
 
-      <div className="harvest-bar" role="img" aria-label="Contribution de chacun cette semaine">
+      {goal != null ? (
+        <div className={`harvest-goal ${reached ? 'reached' : ''}`}>
+          <span className="display">
+            {reached ? '🎉 Objectif atteint !' : `🎯 Objectif : ${total} / ${goal} 🌰`}
+            {goalReward ? ` → ${goalReward}` : ''}
+          </span>
+          <div className="harvest-goal-bar" role="progressbar" aria-valuenow={Math.min(total, goal)} aria-valuemin={0} aria-valuemax={goal}>
+            <div style={{ width: `${Math.min(100, (total / goal) * 100)}%` }} />
+          </div>
+        </div>
+      ) : (
+        onSetGoal && (
+          <button className="harvest-setgoal" onClick={onSetGoal}>
+            🎯 Se fixer un objectif de famille (et une récompense)
+          </button>
+        )
+      )}
+
+      <div className="harvest-bar" role="img" aria-label={`Contribution de chacun : ${contribs.map((c) => `${c.m.name} ${c.g}`).join(', ')}`}>
         {total === 0 ? (
           <div className="harvest-empty" />
         ) : (
@@ -45,7 +58,7 @@ export function Harvest({ members, weekGlands }: { members: Member[]; weekGlands
               <div
                 key={c.m.id}
                 className="harvest-seg"
-                style={{ width: `${(c.g / total) * 100}%`, background: c.m.color }}
+                style={{ width: `${(c.g / total) * 100}%`, background: memberColor(members, c.m.id) }}
                 title={`${c.m.name} : ${c.g} 🌰`}
               />
             ))
@@ -55,6 +68,7 @@ export function Harvest({ members, weekGlands }: { members: Member[]; weekGlands
       <div className="harvest-people">
         {contribs.map((c) => (
           <div key={c.m.id} className="harvest-person">
+            <span className="harvest-dot" style={{ background: memberColor(members, c.m.id) }} aria-hidden />
             <Creature species={c.m.creature} size={30} mood={c.g > 0 ? 'joy' : 'normal'} />
             <span className="harvest-name">{c.m.name}</span>
             <span className="harvest-glands">{c.g} 🌰</span>
@@ -67,7 +81,7 @@ export function Harvest({ members, weekGlands }: { members: Member[]; weekGlands
           Ensemble : <strong>{total} 🌰</strong> cette semaine 🌱
         </p>
       )}
-      <p className="harvest-hint muted">{harvestMessage(members, weekGlands)}</p>
+      <p className="harvest-hint muted">{harvestMessage(members, week, today)}</p>
     </div>
   );
 }

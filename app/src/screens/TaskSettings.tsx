@@ -5,6 +5,9 @@ import { ZONE_META, catInfo } from '../zones';
 import { SCENE_ZONES } from '@shared/types';
 import type { AppState, Category, TaskDef } from '../types';
 import { useEscape } from '../useEscape';
+import { MomentPicker } from './Week';
+import { MOMENT_META } from '../zones';
+import type { Moment } from '../types';
 import './tasksettings.css';
 
 const DAY_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -51,6 +54,9 @@ export function TaskSettings({ onClose }: { onClose: () => void }) {
                 <span className="tset-meta">
                   {catInfo(state.categories, d.zone).label} · {recurrenceLabel(d)} · {'🌰'.repeat(d.weight)}
                   {d.childTask ? ' · enfant 🧸' : ''}
+                  {d.pool ? ' · à prendre 🙋' : ''}
+                  {d.moment ? ` · ${MOMENT_META[d.moment].emoji} ${d.moment}` : ''}
+                  {d.reminderTime ? ` · ⏰ ${d.reminderTime}` : ''}
                   {d.season !== 'all' ? (d.season === 'summer' ? ' · été' : ' · hiver') : ''}
                   {!d.active ? ' · en pause' : ''}
                 </span>
@@ -109,11 +115,13 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
   const [fixedAssignee, setFixedAssignee] = useState(def?.fixedAssignee ?? '');
   const [season, setSeason] = useState(def?.season ?? 'all');
   const [active, setActive] = useState(def?.active ?? true);
+  const [pool, setPool] = useState(def?.pool ?? false);
+  const [moment, setMoment] = useState<Moment | null>(def?.moment ?? null);
+  const [reminderTime, setReminderTime] = useState(def?.reminderTime ?? '');
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!state) return null;
-  const adults = state.members.filter((m) => m.role === 'adult');
 
   async function save() {
     if (!title.trim() || busy) return;
@@ -124,9 +132,12 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
       weight,
       recurrence: mode === 'days' && days.length > 0 ? { daysOfWeek: [...days].sort() } : { timesPerWeek: freq },
       childTask,
-      fixedAssignee: childTask ? null : fixedAssignee || null,
+      fixedAssignee: childTask || pool ? null : fixedAssignee || null,
       season,
       active,
+      pool,
+      moment,
+      reminderTime: reminderTime || null,
     };
     try {
       const s = def ? await api<AppState>(`/tasks/${def.id}`, { method: 'PUT', body }) : await api<AppState>('/tasks', { body });
@@ -216,21 +227,52 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
 
         <p className="muted">Qui :</p>
         <div className="move-row wrap">
-          <button className={`move-chip ${!childTask && !fixedAssignee ? 'active' : ''}`} onClick={() => { setChildTask(false); setFixedAssignee(''); }}>
+          <button
+            aria-pressed={!childTask && !fixedAssignee && !pool}
+            className={`move-chip ${!childTask && !fixedAssignee && !pool ? 'active' : ''}`}
+            onClick={() => { setChildTask(false); setFixedAssignee(''); setPool(false); }}
+          >
             🔄 En rotation
           </button>
-          {adults.map((a) => (
+          <button
+            aria-pressed={pool}
+            className={`move-chip ${pool ? 'active' : ''}`}
+            onClick={() => { setChildTask(false); setFixedAssignee(''); setPool(true); }}
+          >
+            🙋 Le premier qui la prend
+          </button>
+          <button
+            aria-pressed={childTask}
+            className={`move-chip ${childTask ? 'active' : ''}`}
+            onClick={() => { setChildTask(true); setFixedAssignee(''); setPool(false); }}
+          >
+            🧸 Mission enfant
+          </button>
+          {state.members.map((a) => (
             <button
               key={a.id}
+              aria-pressed={fixedAssignee === a.id}
               className={`move-chip ${fixedAssignee === a.id ? 'active' : ''}`}
-              onClick={() => { setChildTask(false); setFixedAssignee(a.id); }}
+              onClick={() => { setChildTask(false); setFixedAssignee(a.id); setPool(false); }}
             >
               Toujours {a.name}
             </button>
           ))}
-          <button className={`move-chip ${childTask ? 'active' : ''}`} onClick={() => { setChildTask(true); setFixedAssignee(''); }}>
-            🧸 Mission enfant
-          </button>
+        </div>
+
+        <p className="muted">Moment de la journée :</p>
+        <MomentPicker value={moment} onChange={setMoment} />
+
+        <p className="muted">⏰ Rappel à heure précise (notification) :</p>
+        <div className="move-row">
+          <label className="move-chip tset-date">
+            <input type="time" value={reminderTime} onChange={(e) => setReminderTime(e.target.value)} aria-label="Heure du rappel" />
+          </label>
+          {reminderTime && (
+            <button className="move-chip" onClick={() => setReminderTime('')}>
+              Sans rappel
+            </button>
+          )}
         </div>
 
         <p className="muted">Saison :</p>

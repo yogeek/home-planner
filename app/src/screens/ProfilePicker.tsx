@@ -16,6 +16,7 @@ export function ProfilePicker() {
             <Creature species={m.creature} size={96} />
             <span className="picker-name">{m.name}</span>
             {m.role === 'child' && <span className="picker-tag">petit habitant</span>}
+            {m.role === 'teen' && <span className="picker-tag">ado</span>}
           </button>
         ))}
       </div>
