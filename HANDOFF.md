@@ -18,7 +18,7 @@ Audit UI complet (Playwright mobile 390x844 + tablette 1280) puis implémentatio
 - **UI** : retards, « à prendre », mercis, échanges, confier avec annulation (toast avec action), fête de fin de journée, bilan dimanche/lundi, semaine prochaine, objectif de famille, vacances, code parent (PinPad), tirelire et récompenses, lecture à voix haute, onboarding ado + maison, cibles tactiles 44px, couleurs distinctes par habitant, dates en minuscules.
 - **Service worker** (v2) : ne met plus en cache une page HTML servie à la place d'un asset (sinon écran blanc après un déploiement).
 
-## 2e chantier panel (19/07) : foyer flexible, récolte, accessibilité — TERMINÉ
+## 2e chantier panel (19/07) : foyer flexible, récolte, accessibilité : TERMINÉ
 
 Suite à un 2e panel de 5 foyers (parents débordés, famille recomposée/ados, parent solo, couple sans enfant, grand-mère), livré et déployé :
 - **Foyer flexible** : onboarding par profils-types (couple/solo/coloc/à composer) + constructeur libre N adultes/N enfants ; distribution généralisée (migration mentale : distributeWeek prend `adults: string[]`, `children: string[]`) ; gestion des habitants après coup (Plus → Gérer les habitants ; endpoints /members POST, PUT/DELETE). Garde-fou : 1 adulte minimum.
@@ -34,7 +34,8 @@ Suite à un 2e panel de 5 foyers (parents débordés, famille recomposée/ados, 
 3 personas (Papa mobile pressé, Maman organisée/équité, Tablette+enfant 4 ans) sur environnements isolés (wrangler dev ports 8791-8793, --persist-to séparés). Résultat final : Papa SATISFAIT 8/10, Maman SATISFAITE 8,5/10, Tablette SATISFAIT 9/10 (tableau) et 8/10 (enfant), zéro bug bloquant observé. Correctifs issus des cycles : rayons de courses devinés par mots-clés (shared/aisles.ts, côté serveur ET client), quantités « ×n » au lieu du refus de doublon (migration 0004), fiche article (rayon/quantité), pénibilité visible dans Semaine, vraie case à cocher ronde, toasts de confirmation partout, message balançoire neutre à 0-0, choix de la personne (dont l'enfant) à l'ajout rapide, ajout rapide depuis Aujourd'hui, fermeture des fiches par Échap. Leçon méthodo : les « bugs » des tests concurrents sur une même base étaient des artefacts (isoler les testeurs), et exiger des agents un test UI-only (jamais de lecture du code source).
 
 - **URL prod** : https://le-village.boka-reunion.workers.dev
-- **Lien famille (secret)** : voir `docs/GUIDE-FAMILLE.md` (jeton `FAMILY_TOKEN` en secret Cloudflare)
+- **Lien famille (secret)** : `pass show env/village` (`VILLAGE_URL`, `VILLAGE_KEY`). Jamais dans le dépôt, qui est public. Clé changée le 18/11/2026 (l'ancienne était committée dans le guide). Changer la clé : `wrangler secret put FAMILY_TOKEN`, puis mettre à jour `env/village`.
+- **Token Cloudflare** : `pass show env/cloudflare`, aussi en secret GitHub `CLOUDFLARE_API_TOKEN` : chaque push sur main déploie et migre.
 - La base prod est vierge : la famille fera son onboarding elle-même (écran « Fonder notre village »).
 
 ## Vérifié par audit E2E (Chrome + Playwright mobile 390x844)

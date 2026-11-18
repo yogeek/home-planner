@@ -40,4 +40,4 @@ npm run dev           # serveur local (API + app)
 npm run deploy        # déploiement Cloudflare
 ```
 
-Docs : spec dans `docs/superpowers/specs/`, plan dans `docs/superpowers/plans/`, état de session dans `HANDOFF.md`, guide famille dans `docs/GUIDE-FAMILLE.md`. CI/CD : `.github/workflows/deploy.yml` (déploiement auto si le secret `CLOUDFLARE_API_TOKEN` est configuré sur le repo).
+Docs : spec dans `docs/superpowers/specs/`, plan dans `docs/superpowers/plans/`, état de session dans `HANDOFF.md`, guide famille dans `docs/GUIDE-FAMILLE.md`. CI/CD : `.github/workflows/deploy.yml` (déploiement auto à chaque push sur main, via le secret `CLOUDFLARE_API_TOKEN` du repo ; le lien famille n'est jamais dans le dépôt).

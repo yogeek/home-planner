@@ -1,8 +1,8 @@
 # Bienvenue au Village 🏡
 
-Votre lien secret de famille (à garder entre vous) :
+Votre lien secret de famille (à garder entre vous) : `https://le-village.boka-reunion.workers.dev/?k=<clé>`.
 
-**https://le-village.boka-reunion.workers.dev/?k=5ac343b6727a7c07a429c11b**
+La clé n'est jamais écrite dans ce dépôt (il est public). Elle est dans le coffre `pass` : `pass show env/village` affiche le lien complet (`VILLAGE_URL`). Partagez-le en privé (message direct, QR code), jamais dans un endroit public.
 
 ## Premier lancement (2 minutes)
 
