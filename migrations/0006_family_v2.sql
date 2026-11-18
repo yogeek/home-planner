@@ -15,10 +15,14 @@ CREATE TABLE members_new (
   away_until TEXT,
   busy_days TEXT NOT NULL DEFAULT '[]'
 );
-INSERT INTO members_new (id, name, creature, role, color, notif_prefs, created_at)
-  SELECT id, name, creature, role, color, notif_prefs, created_at FROM members;
+-- D1 applique les clés étrangères : on copie d'abord dans une table sans contrainte, puis on
+-- réinsère APRÈS le renommage, pour que les lignes enfants retrouvent leur parent avant le commit.
+CREATE TABLE members_bak AS SELECT * FROM members;
 DROP TABLE members;
 ALTER TABLE members_new RENAME TO members;
+INSERT INTO members (id, name, creature, role, color, notif_prefs, created_at)
+  SELECT id, name, creature, role, color, notif_prefs, created_at FROM members_bak;
+DROP TABLE members_bak;
 
 -- Occurrences : assigné facultatif (tâche à prendre), moment, « confiée par »
 CREATE TABLE occurrences_new (
