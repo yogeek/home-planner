@@ -25,6 +25,8 @@ export function expandWeek(defs: TaskDef[], weekStart: string, season: 'summer' 
       date,
       fixedAssignee: def.fixedAssignee ?? null,
       childTask: def.childTask,
+      moment: def.moment ?? null,
+      pool: !!def.pool,
     });
 
     const { daysOfWeek, timesPerWeek } = def.recurrence;
@@ -43,20 +45,37 @@ export function expandWeek(defs: TaskDef[], weekStart: string, season: 'summer' 
   return slots;
 }
 
+export interface DistributeOptions {
+  /** Ados : tâches légères (pénibilité <= 3) en rotation, avec une part réduite de moitié */
+  teens?: string[];
+  /** Charge déjà attribuée (tâches gardées lors d'un rééquilibrage) */
+  initialLoad?: Record<string, number>;
+  /** Disponibilité d'une personne un jour donné (absence, jour chargé) */
+  isAvailable?: (memberId: string, date: string) => boolean;
+}
+
+/** Pénibilité maximale d'une tâche confiée à un ado */
+export const TEEN_MAX_WEIGHT = 3;
+/** Une noisette d'ado « compte double » dans l'équilibre : sa part est environ moitié */
+const TEEN_LOAD_FACTOR = 2;
+
 export function distributeWeek(
   slots: Slot[],
   adults: string[],
   children: string[],
   lastAssignee: Record<string, string>,
+  opts: DistributeOptions = {},
 ): Occurrence[] {
   const occurrences: Occurrence[] = [];
   if (adults.length === 0) return occurrences;
-  const load: Record<string, number> = {};
-  for (const a of adults) load[a] = 0;
-  const childLoad: Record<string, number> = {};
-  for (const c of children) childLoad[c] = 0;
+  const teens = opts.teens ?? [];
+  const available = opts.isAvailable ?? (() => true);
+  const factor = (m: string) => (teens.includes(m) ? TEEN_LOAD_FACTOR : 1);
 
-  const toOcc = (slot: Slot, assignee: string, idx: number): Occurrence => ({
+  const load: Record<string, number> = {};
+  for (const m of [...adults, ...teens, ...children]) load[m] = (opts.initialLoad?.[m] ?? 0) * factor(m);
+
+  const toOcc = (slot: Slot, assignee: string | null, idx: number): Occurrence => ({
     id: `${slot.date}-${slot.defId}-${idx}`,
     defId: slot.defId,
     title: slot.title,
@@ -65,6 +84,7 @@ export function distributeWeek(
     date: slot.date,
     assignee,
     status: 'todo',
+    moment: slot.moment ?? null,
   });
 
   // Tri déterministe : poids décroissant puis identifiant/date
@@ -73,9 +93,9 @@ export function distributeWeek(
   );
 
   /** Personne la moins chargée ; à égalité, rotation (éviter celui qui l'a fait la dernière fois) */
-  const pickLeast = (candidates: string[], loadMap: Record<string, number>, defId: string): string => {
-    const min = Math.min(...candidates.map((c) => loadMap[c]));
-    const tied = candidates.filter((c) => loadMap[c] === min);
+  const pickLeast = (candidates: string[], defId: string): string => {
+    const min = Math.min(...candidates.map((c) => load[c]));
+    const tied = candidates.filter((c) => load[c] === min);
     if (tied.length === 1) return tied[0];
     const last = lastAssignee[defId];
     return tied.find((c) => c !== last) ?? tied[0];
@@ -84,21 +104,28 @@ export function distributeWeek(
   let idx = 0;
   for (const slot of sorted) {
     idx++;
+    if (slot.pool) {
+      occurrences.push(toOcc(slot, null, idx));
+      continue;
+    }
     if (slot.childTask) {
-      if (children.length === 0) continue;
-      const pick = pickLeast(children, childLoad, slot.defId);
+      const kids = children.filter((c) => available(c, slot.date));
+      if (kids.length === 0) continue;
+      const pick = pickLeast(kids, slot.defId);
       occurrences.push(toOcc(slot, pick, idx));
-      childLoad[pick] += slot.weight;
+      load[pick] += slot.weight;
       continue;
     }
-    if (slot.fixedAssignee) {
+    if (slot.fixedAssignee && available(slot.fixedAssignee, slot.date)) {
       occurrences.push(toOcc(slot, slot.fixedAssignee, idx));
-      if (slot.fixedAssignee in load) load[slot.fixedAssignee] += slot.weight;
+      if (slot.fixedAssignee in load) load[slot.fixedAssignee] += slot.weight * factor(slot.fixedAssignee);
       continue;
     }
-    const pick = pickLeast(adults, load, slot.defId);
+    const pool = [...adults, ...(slot.weight <= TEEN_MAX_WEIGHT ? teens : [])].filter((m) => available(m, slot.date));
+    if (pool.length === 0) continue;
+    const pick = pickLeast(pool, slot.defId);
     occurrences.push(toOcc(slot, pick, idx));
-    load[pick] += slot.weight;
+    load[pick] += slot.weight * factor(pick);
   }
 
   return occurrences.sort((a, b) => a.date.localeCompare(b.date) || b.weight - a.weight);

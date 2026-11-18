@@ -160,4 +160,65 @@ describe('distributeWeek', () => {
     expect(occs[0]).toMatchObject({ defId: 'a', status: 'todo', zone: 'cuisine', weight: 2, date: WEEK });
     expect(occs[0].id).toBeTruthy();
   });
+
+  describe('options étendues', () => {
+    const TEEN = 'ado';
+
+    it('un ado reçoit des tâches légères, jamais les lourdes', () => {
+      const slots = [
+        slot({ defId: 'lourde', weight: 5 }),
+        ...Array.from({ length: 6 }, (_, i) => slot({ defId: `l${i}`, weight: 1 })),
+      ];
+      const occs = distributeWeek(slots, [A, B], [], {}, { teens: [TEEN] });
+      const teenOccs = occs.filter((o) => o.assignee === TEEN);
+      expect(teenOccs.length).toBeGreaterThan(0);
+      expect(teenOccs.every((o) => o.weight <= 3)).toBe(true);
+    });
+
+    it("la part d'un ado est environ moitié de celle d'un adulte", () => {
+      const slots = Array.from({ length: 20 }, (_, i) => slot({ defId: `t${i}`, weight: 2 }));
+      const occs = distributeWeek(slots, [A, B], [], {}, { teens: [TEEN] });
+      const load = (m: string) => occs.filter((o) => o.assignee === m).reduce((s, o) => s + o.weight, 0);
+      expect(load(TEEN)).toBeGreaterThan(0);
+      expect(load(TEEN)).toBeLessThan(load(A));
+      expect(load(TEEN) * 2).toBeGreaterThanOrEqual(load(A) - 4);
+    });
+
+    it("un ado ne reçoit pas les missions enfant", () => {
+      const occs = distributeWeek([slot({ defId: 'jouets', childTask: true })], [A], [KID], {}, { teens: [TEEN] });
+      expect(occs[0].assignee).toBe(KID);
+    });
+
+    it('la charge déjà attribuée compte dans l\'équilibre', () => {
+      const slots = [slot({ defId: 'a', weight: 2 }), slot({ defId: 'b', weight: 2 })];
+      const occs = distributeWeek(slots, [A, B], [], {}, { initialLoad: { [A]: 10 } });
+      expect(occs.every((o) => o.assignee === B)).toBe(true);
+    });
+
+    it("une personne indisponible ce jour-là ne reçoit rien", () => {
+      const slots = Array.from({ length: 4 }, (_, i) => slot({ defId: `t${i}`, weight: 2 }));
+      const occs = distributeWeek(slots, [A, B], [], {}, { isAvailable: (m) => m !== A });
+      expect(occs.every((o) => o.assignee === B)).toBe(true);
+    });
+
+    it("une tâche fixe d'une personne absente passe en rotation", () => {
+      const occs = distributeWeek([slot({ defId: 'p', fixedAssignee: A })], [A, B], [], {}, { isAvailable: (m) => m !== A });
+      expect(occs[0].assignee).toBe(B);
+    });
+
+    it('si personne n\'est disponible, le créneau est ignoré', () => {
+      const occs = distributeWeek([slot({ defId: 'p' })], [A, B], [], {}, { isAvailable: () => false });
+      expect(occs).toHaveLength(0);
+    });
+
+    it("une tâche « au premier qui la prend » n'a pas d'assigné", () => {
+      const occs = distributeWeek([slot({ defId: 'p', pool: true })], [A, B], [], {});
+      expect(occs[0].assignee).toBeNull();
+    });
+
+    it('le moment de la journée est recopié', () => {
+      const occs = distributeWeek([slot({ defId: 'p', moment: 'soir' })], [A], [], {});
+      expect(occs[0].moment).toBe('soir');
+    });
+  });
 });

@@ -23,6 +23,6 @@ export default {
   },
 
   async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(runCron(event.cron, env));
+    ctx.waitUntil(runCron(event.scheduledTime, env));
   },
 } satisfies ExportedHandler<Env>;

@@ -15,9 +15,11 @@ export function rowToMember(r: Row): Member {
     id: r.id as string,
     name: r.name as string,
     creature: r.creature as string,
-    role: r.role as 'adult' | 'child',
+    role: r.role as Member['role'],
     color: r.color as string,
     notifPrefs: JSON.parse((r.notif_prefs as string) || '{}'),
+    awayUntil: (r.away_until as string) || null,
+    busyDays: JSON.parse((r.busy_days as string) || '[]'),
   };
 }
 
@@ -33,6 +35,8 @@ export function rowToTaskDef(r: Row): TaskDef {
     reminderTime: (r.reminder_time as string) || null,
     season: r.season as TaskDef['season'],
     active: !!r.active,
+    moment: (r.moment as TaskDef['moment']) || null,
+    pool: !!r.pool,
   };
 }
 
@@ -44,13 +48,15 @@ export function rowToOccurrence(r: Row): Occurrence {
     zone: r.zone as Occurrence['zone'],
     weight: r.weight as number,
     date: r.date as string,
-    assignee: r.assignee as string,
+    assignee: (r.assignee as string) || null,
     status: r.status as Occurrence['status'],
     doneAt: (r.done_at as string) || null,
     doneBy: (r.done_by as string) || null,
     validatedBy: (r.validated_by as string) || null,
     manual: !!r.manual,
     groupId: (r.group_id as string) || null,
+    moment: (r.moment as Occurrence['moment']) || null,
+    handedBy: (r.handed_by as string) || null,
   };
 }
 
@@ -138,4 +144,33 @@ export async function getCategories(db: D1Database): Promise<Category[]> {
 export async function getAllProgress(db: D1Database): Promise<MemberProgress[]> {
   const { results } = await db.prepare('SELECT * FROM progress').all();
   return results.map(rowToProgress);
+}
+
+export interface FamilySettings {
+  weeklyGoal: number | null;
+  goalReward: string | null;
+  pauseFrom: string | null;
+  pauseUntil: string | null;
+  parentPin: string | null;
+}
+
+export async function getSettings(db: D1Database): Promise<FamilySettings> {
+  const { results } = await db.prepare('SELECT key, value FROM settings').all();
+  const kv: Record<string, string> = {};
+  for (const r of results) kv[r.key as string] = r.value as string;
+  return {
+    weeklyGoal: kv.weekly_goal ? Number(kv.weekly_goal) : null,
+    goalReward: kv.goal_reward || null,
+    pauseFrom: kv.pause_from || null,
+    pauseUntil: kv.pause_until || null,
+    parentPin: kv.parent_pin || null,
+  };
+}
+
+export function setSetting(db: D1Database, key: string, value: string | null): D1PreparedStatement {
+  return value === null || value === ''
+    ? db.prepare('DELETE FROM settings WHERE key = ?').bind(key)
+    : db
+        .prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+        .bind(key, value);
 }

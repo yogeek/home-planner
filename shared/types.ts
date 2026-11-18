@@ -21,6 +21,10 @@ export const AISLES = [
   'boissons',
   'hygiène',
   'maison',
+  'boulangerie',
+  'surgelés',
+  'animaux',
+  'bébé',
   'autre',
 ] as const;
 export type Aisle = (typeof AISLES)[number];
@@ -33,13 +37,24 @@ export interface Recurrence {
   daysOfWeek?: number[];
 }
 
+/** adult : tâches en rotation ; teen : tâches légères en rotation (part réduite) ; child : missions enfant */
+export type Role = 'adult' | 'teen' | 'child';
+
+/** Moment de la journée d'une tâche (null = n'importe quand) */
+export type Moment = 'matin' | 'midi' | 'soir';
+export const MOMENTS: Moment[] = ['matin', 'midi', 'soir'];
+
 export interface Member {
   id: string;
   name: string;
   creature: string;
-  role: 'adult' | 'child';
+  role: Role;
   color: string;
   notifPrefs: { morning: boolean; evening: boolean };
+  /** Absent(e) jusqu'à cette date incluse (YYYY-MM-DD) : ne reçoit plus de tâches */
+  awayUntil?: string | null;
+  /** Jours chargés (0 = lundi) : pas de tâche en rotation ces jours-là */
+  busyDays?: number[];
 }
 
 export interface TaskDef {
@@ -54,6 +69,9 @@ export interface TaskDef {
   reminderTime?: string | null;
   season: Season;
   active: boolean;
+  moment?: Moment | null;
+  /** Tâche « au premier qui la prend » : pas d'assigné à la génération */
+  pool?: boolean;
 }
 
 /** Une occurrence à planifier (issue de l'expansion d'une définition) */
@@ -65,6 +83,8 @@ export interface Slot {
   date: string; // YYYY-MM-DD
   fixedAssignee?: string | null;
   childTask: boolean;
+  moment?: Moment | null;
+  pool?: boolean;
 }
 
 export interface Occurrence {
@@ -75,7 +95,8 @@ export interface Occurrence {
   zone: string;
   weight: number;
   date: string; // YYYY-MM-DD
-  assignee: string;
+  /** null = à prendre par n'importe qui */
+  assignee: string | null;
   status: 'todo' | 'done' | 'skipped';
   doneAt?: string | null;
   doneBy?: string | null;
@@ -83,6 +104,9 @@ export interface Occurrence {
   manual?: boolean;
   /** Lie les occurrences d'une même tâche partagée (une par participant) */
   groupId?: string | null;
+  moment?: Moment | null;
+  /** Qui a confié cette tâche à l'assigné (« confiée par Papa ») */
+  handedBy?: string | null;
 }
 
 export interface MemberProgress {

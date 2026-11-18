@@ -21,7 +21,7 @@
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["VillageHub"] }],
   "triggers": {
-    "crons": ["0 3 * * *", "30 14 * * *", "0 14 * * SUN"]
+    "crons": ["*/15 * * * *"]
   },
   "observability": { "enabled": true }
 }

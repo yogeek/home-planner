@@ -2,6 +2,11 @@ import type { Aisle } from './types';
 
 /** Mots-clés (sans accents, minuscules) → rayon. Premier match gagne. */
 const KEYWORDS: [Aisle, string[]][] = [
+  // Rayons spécialisés d'abord (« croquettes chat » avant « maison », « pizza surgelée » avant « épicerie »)
+  ['animaux', ['croquette', 'litiere', 'patee', 'friandise chat', 'friandise chien', 'chat', 'chien', 'aquarium', 'graine oiseau']],
+  ['bébé', ['couche', 'petit pot', 'petits pot', 'lait infantile', 'lait bebe', 'biberon', 'tetine', 'lingette bebe', 'bebe']],
+  ['surgelés', ['surgele', 'glace', 'sorbet', 'pizza', 'frite', 'congele', 'nugget']],
+  ['boulangerie', ['pain', 'baguette', 'croissant', 'pain au chocolat', 'brioche', 'viennoiserie', 'pain de mie', 'galette']],
   // Boissons d'abord : « jus de mangue » est une boisson, pas un fruit
   ['boissons', ['eau', 'jus', 'soda', 'cola', 'limonade', 'sirop', 'biere', 'vin', 'rhum', 'cidre', 'boisson']],
   [
@@ -14,15 +19,15 @@ const KEYWORDS: [Aisle, string[]][] = [
   ],
   [
     'épicerie',
-    ['pain', 'baguette', 'riz', 'pate', 'spaghetti', 'nouille', 'farine', 'sucre', 'sel', 'poivre', 'huile', 'vinaigre', 'conserve', 'thon', 'sardine', 'tomate pelee', 'sauce', 'ketchup', 'mayonnaise', 'moutarde', 'cereale', 'muesli', 'confiture', 'miel', 'nutella', 'chocolat', 'biscuit', 'gateau', 'chips', 'cacahuete', 'lentille', 'pois', 'grain', 'cari', 'curcuma', 'epice', 'massale', 'bouillon', 'soupe', 'compote', 'cafe', 'the ', 'tisane', 'cacao', 'brioche', 'surgele', 'glace', 'pizza'],
+    ['riz', 'pate', 'spaghetti', 'nouille', 'farine', 'sucre', 'sel', 'poivre', 'huile', 'vinaigre', 'conserve', 'thon', 'sardine', 'tomate pelee', 'sauce', 'ketchup', 'mayonnaise', 'moutarde', 'cereale', 'muesli', 'confiture', 'miel', 'nutella', 'chocolat', 'biscuit', 'gateau', 'chips', 'cacahuete', 'lentille', 'pois', 'grain', 'cari', 'curcuma', 'epice', 'massale', 'bouillon', 'soupe', 'compote', 'cafe', 'the ', 'tisane', 'cacao'],
   ],
   [
     'hygiène',
-    ['savon', 'gel douche', 'shampoing', 'shampooing', 'dentifrice', 'brosse a dent', 'deodorant', 'rasoir', 'mousse a raser', 'coton', 'couche', 'lingette', 'mouchoir', 'papier toilette', 'pq', 'serviette hygienique', 'tampon', 'creme solaire', 'moustique'],
+    ['savon', 'gel douche', 'shampoing', 'shampooing', 'dentifrice', 'brosse a dent', 'deodorant', 'rasoir', 'mousse a raser', 'coton', 'lingette', 'mouchoir', 'papier toilette', 'pq', 'serviette hygienique', 'tampon', 'creme solaire', 'moustique'],
   ],
   [
     'maison',
-    ['lessive', 'adoucissant', 'liquide vaisselle', 'eponge', 'essuie-tout', 'sopalin', 'javel', 'nettoyant', 'desinfectant', 'sac poubelle', 'aluminium', 'film etirable', 'pile', 'ampoule', 'allumette', 'bougie', 'croquette', 'litiere'],
+    ['lessive', 'adoucissant', 'liquide vaisselle', 'eponge', 'essuie-tout', 'sopalin', 'javel', 'nettoyant', 'desinfectant', 'sac poubelle', 'aluminium', 'film etirable', 'pile', 'ampoule', 'allumette', 'bougie'],
   ],
 ];
 

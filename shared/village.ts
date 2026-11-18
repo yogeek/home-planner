@@ -64,7 +64,7 @@ export function weekContributions(occurrences: Occurrence[], memberIds: string[]
   const totals: Record<string, number> = {};
   for (const id of memberIds) totals[id] = 0;
   for (const o of occurrences) {
-    if (o.status === 'done' && o.assignee in totals) totals[o.assignee] += o.weight;
+    if (o.status === 'done' && o.assignee && o.assignee in totals) totals[o.assignee] += o.weight;
   }
   return totals;
 }

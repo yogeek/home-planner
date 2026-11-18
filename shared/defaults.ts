@@ -7,8 +7,8 @@ import type { TaskDef } from './types';
  */
 export const DEFAULT_TASK_DEFS: Omit<TaskDef, 'id'>[] = [
   // Cuisine
-  { title: 'Préparer les repas', zone: 'cuisine', weight: 3, recurrence: { timesPerWeek: 7 }, childTask: false, season: 'all', active: true },
-  { title: 'Vaisselle & plan de travail', zone: 'cuisine', weight: 2, recurrence: { timesPerWeek: 7 }, childTask: false, season: 'all', active: true },
+  { title: 'Préparer les repas', zone: 'cuisine', weight: 3, recurrence: { timesPerWeek: 7 }, childTask: false, season: 'all', active: true, moment: 'soir' },
+  { title: 'Vaisselle & plan de travail', zone: 'cuisine', weight: 2, recurrence: { timesPerWeek: 7 }, childTask: false, season: 'all', active: true, moment: 'soir' },
   { title: 'Nettoyer le frigo', zone: 'cuisine', weight: 3, recurrence: { timesPerWeek: 0.25 }, childTask: false, season: 'all', active: true },
 
   // Lessive
@@ -19,7 +19,7 @@ export const DEFAULT_TASK_DEFS: Omit<TaskDef, 'id'>[] = [
   // Rangement / nettoyage
   { title: 'Aspirateur / sols', zone: 'rangement', weight: 4, recurrence: { timesPerWeek: 2 }, childTask: false, season: 'all', active: true },
   { title: 'Nettoyer la salle de bain', zone: 'rangement', weight: 4, recurrence: { timesPerWeek: 1 }, childTask: false, season: 'all', active: true },
-  { title: 'Sortir les poubelles', zone: 'rangement', weight: 1, recurrence: { daysOfWeek: [1] }, reminderTime: '19:00', childTask: false, season: 'all', active: true },
+  { title: 'Sortir les poubelles', zone: 'rangement', weight: 1, recurrence: { daysOfWeek: [1] }, reminderTime: '19:00', childTask: false, season: 'all', active: true, moment: 'soir' },
   { title: 'Ranger le salon', zone: 'rangement', weight: 2, recurrence: { timesPerWeek: 2 }, childTask: false, season: 'all', active: true },
 
   // Courses
@@ -39,7 +39,35 @@ export const DEFAULT_TASK_DEFS: Omit<TaskDef, 'id'>[] = [
   { title: 'Ranger mes jouets', zone: 'rangement', weight: 1, recurrence: { timesPerWeek: 5 }, childTask: true, season: 'all', active: true },
   { title: 'Mettre mes chaussures au placard', zone: 'rangement', weight: 1, recurrence: { timesPerWeek: 3 }, childTask: true, season: 'all', active: true },
   { title: 'Arroser ma plante', zone: 'jardin', weight: 1, recurrence: { timesPerWeek: 2 }, childTask: true, season: 'all', active: true },
-  { title: 'Aider à mettre la table', zone: 'cuisine', weight: 1, recurrence: { timesPerWeek: 3 }, childTask: true, season: 'all', active: true },
+  { title: 'Aider à mettre la table', zone: 'cuisine', weight: 1, recurrence: { timesPerWeek: 3 }, childTask: true, season: 'all', active: true, moment: 'soir' },
 ];
 
 /** Récurrence fractionnaire : timesPerWeek 0.5 = toutes les 2 semaines, 0.25 = 1 fois par mois. */
+
+export interface HomeOptions {
+  garden: boolean;
+  pool: boolean;
+  pet: boolean;
+}
+
+/** Tâches liées aux animaux, ajoutées si le foyer en a */
+const PET_TASK_DEFS: Omit<TaskDef, 'id'>[] = [
+  { title: "Nourrir l'animal", zone: 'loisirs', weight: 1, recurrence: { timesPerWeek: 7 }, childTask: false, season: 'all', active: true, moment: 'matin' },
+  { title: 'Litière / promenade', zone: 'loisirs', weight: 2, recurrence: { timesPerWeek: 3 }, childTask: false, season: 'all', active: true },
+  { title: "Donner à boire à l'animal", zone: 'loisirs', weight: 1, recurrence: { timesPerWeek: 3 }, childTask: true, season: 'all', active: true },
+];
+
+/** Tâches de jardin extérieur (les plantes d'intérieur restent pour tout le monde) */
+const OUTDOOR_GARDEN = new Set(['Tondre la pelouse', 'Désherber / entretenir']);
+
+/** Tâches par défaut adaptées à la maison décrite à l'onboarding */
+export function defaultTaskDefs(home: HomeOptions = { garden: true, pool: true, pet: false }): Omit<TaskDef, 'id'>[] {
+  return [
+    ...DEFAULT_TASK_DEFS.filter((d) => {
+      if (!home.pool && d.zone === 'piscine') return false;
+      if (!home.garden && OUTDOOR_GARDEN.has(d.title)) return false;
+      return true;
+    }),
+    ...(home.pet ? PET_TASK_DEFS : []),
+  ];
+}
