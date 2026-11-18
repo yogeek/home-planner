@@ -75,7 +75,7 @@ export function Week() {
                     {o.title}
                     {o.groupId && <span className="week-shared" title="Tâche à plusieurs"> 👥</span>}
                   </span>
-                  <span className="week-task-weight" aria-label={`${o.weight} glands`}>{'🌰'.repeat(o.weight)}</span>
+                  <span className="week-task-weight" aria-label={`${o.weight} noisettes`}>{'🌰'.repeat(o.weight)}</span>
                   {member && <Creature species={member.creature} size={26} />}
                 </button>
               );
@@ -309,7 +309,7 @@ export function AddSheet({ onClose }: { onClose: () => void }) {
           Ajouter (aujourd'hui)
         </button>
         <p className="muted week-add-hint">
-          Sélectionne plusieurs personnes pour une tâche à faire à plusieurs : chacune la coche et gagne ses glands.
+          Sélectionne plusieurs personnes pour une tâche à faire à plusieurs : chacune la coche et gagne ses noisettes.
         </p>
       </div>
     </div>

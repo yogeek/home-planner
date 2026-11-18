@@ -1,6 +1,6 @@
 import { useEscape } from '../useEscape';
 
-/** Explique en clair les glands, les niveaux et l'esprit collectif du village */
+/** Explique en clair les noisettes, les niveaux et l'esprit collectif du village */
 export function GameInfo({ onClose }: { onClose: () => void }) {
   useEscape(onClose);
   return (
@@ -10,7 +10,7 @@ export function GameInfo({ onClose }: { onClose: () => void }) {
         <h3>Comment marche le village ? 🌰</h3>
         <ul className="gameinfo-list">
           <li>
-            <strong>Les glands 🌰</strong> sont la monnaie du village. Chaque tâche accomplie en rapporte à toute la
+            <strong>Les noisettes 🌰</strong> sont la monnaie du village. Chaque tâche accomplie en rapporte à toute la
             famille.
           </li>
           <li>

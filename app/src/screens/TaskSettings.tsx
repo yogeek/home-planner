@@ -166,7 +166,7 @@ function EditSheet({ def, onClose }: { def: TaskDef | null; onClose: () => void 
           ))}
         </div>
 
-        <p className="muted">Pénibilité (glands gagnés) :</p>
+        <p className="muted">Pénibilité (noisettes gagnées) :</p>
         <div className="move-row">
           {[1, 2, 3, 4, 5].map((w) => (
             <button key={w} className={`move-chip ${weight === w ? 'active' : ''}`} onClick={() => setWeight(w)}>

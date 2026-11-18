@@ -6,7 +6,7 @@ import './harvest.css';
 export function harvestMessage(members: Member[], weekGlands: Record<string, number>): string {
   const adults = members.filter((m) => m.role === 'adult');
   const total = members.reduce((s, m) => s + (weekGlands[m.id] ?? 0), 0);
-  if (total === 0) return 'La semaine commence : première mission cochée, premier gland ! 🌱';
+  if (total === 0) return 'La semaine commence : première mission cochée, première noisette ! 🌱';
 
   if (adults.length <= 1) {
     const a = adults[0];

@@ -29,7 +29,7 @@ export interface AppState {
   suggestions: string[];
   frequent: string[];
   progress: MemberProgress[];
-  /** Glands récoltés cette semaine par membre (id → glands) */
+  /** Noisettes récoltées cette semaine par membre (id → noisettes) */
   weekGlands: Record<string, number>;
   monthTotals: Record<string, { total: number; count: number }>;
   taskDefs: TaskDef[];

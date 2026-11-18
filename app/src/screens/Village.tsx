@@ -63,7 +63,7 @@ export function Village() {
         <div className="gauge-head">
           <span className="gauge-level display">Village niveau {info.level}</span>
           <div className="gauge-head-right">
-            <span className="gauge-acorns display" aria-label={`${village.acorns} glands`}>
+            <span className="gauge-acorns display" aria-label={`${village.acorns} noisettes`}>
               🌰 {village.acorns}
             </span>
             <button className="gauge-help" onClick={() => setInfoOpen(true)} aria-label="Comment ça marche ?">
@@ -82,7 +82,7 @@ export function Village() {
         </div>
         {nextUnlock ? (
           <p className="gauge-next">
-            Encore <strong>{nextUnlock.cost - info.intoLevel} glands</strong> ensemble pour débloquer{' '}
+            Encore <strong>{nextUnlock.cost - info.intoLevel} noisettes</strong> ensemble pour débloquer{' '}
             <strong>
               {nextUnlock.unlock} {nextUnlock.emoji}
             </strong>

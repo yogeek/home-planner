@@ -1,6 +1,6 @@
 # Le Village 🏡🦊
 
-Application familiale ludique de gestion des tâches ménagères. Votre foyer devient un petit village de créatures : chaque tâche accomplie (jardin, piscine, lessive, cuisine, courses, rangement) fait vivre sa zone du village, rapporte des glands et fait monter le village de niveau, avec des embellissements permanents à débloquer. Coopératif, bienveillant, pensé pour deux adultes et un enfant de 3-5 ans.
+Application familiale ludique de gestion des tâches ménagères. Votre foyer devient un petit village de créatures : chaque tâche accomplie (jardin, piscine, lessive, cuisine, courses, rangement) fait vivre sa zone du village, rapporte des noisettes et fait monter le village de niveau, avec des embellissements permanents à débloquer. Coopératif, bienveillant, pensé pour deux adultes et un enfant de 3-5 ans.
 
 **Production** : https://le-village.boka-reunion.workers.dev
 
@@ -10,7 +10,7 @@ Application familiale ludique de gestion des tâches ménagères. Votre foyer de
 
 - Village SVG animé qui reflète l'état réel de la maison : 7 zones (potager, source, lavoir, grande table, marché, atelier, clairière) avec fraîcheur, ciel à l'heure réelle, 18 embellissements à débloquer
 - Distribution automatique et équilibrée des tâches chaque semaine (pondération par pénibilité, rotation des corvées), ajustable par tap
-- Écran « Aujourd'hui » : cocher (célébration + glands), annuler, reporter, proposer à l'autre, supprimer
+- Écran « Aujourd'hui » : cocher (célébration + noisettes), annuler, reporter, proposer à l'autre, supprimer
 - Semaine : déplacer une tâche (jour/personne), modifier, supprimer, ajout rapide, rééquilibrage
 - Catégories personnalisables (sport, sorties...) en plus des 6 ménagères, rattachées à une zone du village (clairière par défaut)
 - Réglages : CRUD complet des tâches récurrentes (rythme, pénibilité, assignation fixe ou rotation, mission enfant, saison, pause) et des catégories

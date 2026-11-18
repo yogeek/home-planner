@@ -11,7 +11,7 @@ Les 14 tâches du plan sont faites, plus deux vagues de retours de Guillaume (mo
 Suite à un 2e panel de 5 foyers (parents débordés, famille recomposée/ados, parent solo, couple sans enfant, grand-mère), livré et déployé :
 - **Foyer flexible** : onboarding par profils-types (couple/solo/coloc/à composer) + constructeur libre N adultes/N enfants ; distribution généralisée (migration mentale : distributeWeek prend `adults: string[]`, `children: string[]`) ; gestion des habitants après coup (Plus → Gérer les habitants ; endpoints /members POST, PUT/DELETE). Garde-fou : 1 adulte minimum.
 - **Récolte commune** (remplace la balançoire) : `weekContributions` (remplace weekBalance), composant `Harvest`, contribution de chacun dans une semaine partagée, message d'entraide bienveillant, variante solo. `state.weekGlands` remplace `state.balance`.
-- **Explication des glands** : composant `GameInfo` (modale 1er lancement + bouton « ? » sur la jauge).
+- **Explication des noisettes** : composant `GameInfo` (modale 1er lancement + bouton « ? » sur la jauge).
 - **Vue confortable** (gros texte) : classe `html.comfort`, toggle dans Plus, mémorisé.
 - **Vue « qui fait quoi »** en haut de la Semaine ; **carte de profil** en haut de Plus (changer de personne / mode enfant, avant noyés en bas) ; **palette de 32 emojis** cliquables pour les catégories.
 - Migrations : 0005 (group_id des tâches à plusieurs). Pas de nouvelle migration pour le foyer flexible.
@@ -27,7 +27,7 @@ Suite à un 2e panel de 5 foyers (parents débordés, famille recomposée/ados, 
 
 ## Vérifié par audit E2E (Chrome + Playwright mobile 390x844)
 
-Onboarding complet, choix de profils, écran Village (scène animée, jauge, balançoire), complétion avec célébration et glands, réassignation dans Semaine (flag manual préservé à la régénération), courses (ajout, coche, checkout → historique → suggestions), file hors ligne (503 simulé puis resynchronisation), mode enfant (mission illustrée, validation parentale, confettis), mode tablette (>=1024px), temps réel entre 2 clients via WebSocket, double-done idempotent, auth 401.
+Onboarding complet, choix de profils, écran Village (scène animée, jauge, balançoire), complétion avec célébration et noisettes, réassignation dans Semaine (flag manual préservé à la régénération), courses (ajout, coche, checkout → historique → suggestions), file hors ligne (503 simulé puis resynchronisation), mode enfant (mission illustrée, validation parentale, confettis), mode tablette (>=1024px), temps réel entre 2 clients via WebSocket, double-done idempotent, auth 401.
 
 ## Corrections issues de l'audit (toutes appliquées)
 

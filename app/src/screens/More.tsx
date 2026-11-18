@@ -198,7 +198,7 @@ export function More() {
       <div className="card more-card danger-card">
         <h3>⚠️ Zone dangereuse</h3>
         <p className="muted">
-          Remettre le village à zéro efface tout, pour tout le monde : habitants, glands, niveau, déblocages,
+          Remettre le village à zéro efface tout, pour tout le monde : habitants, noisettes, niveau, déblocages,
           historique, tâches et liste de courses. Utile pour repartir sur de bonnes bases ou après des tests.
         </p>
         <button className="btn danger-btn" onClick={() => setResetOpen(true)}>
@@ -252,7 +252,7 @@ function ResetSheet({ onClose }: { onClose: () => void }) {
         </p>
         <ul className="reset-list">
           <li>les habitants et leurs créatures,</li>
-          <li>les {`glands`}, le niveau et tous les déblocages du village,</li>
+          <li>les {`noisettes`}, le niveau et tous les déblocages du village,</li>
           <li>l'historique des missions et les séries de chacun,</li>
           <li>toutes les tâches (récurrentes et ponctuelles),</li>
           <li>la liste de courses et les habitudes apprises,</li>
